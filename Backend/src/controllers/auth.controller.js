@@ -86,3 +86,13 @@ export const Logout = async (_,res)=>{
     res.cookie("jwt","",{maxAge:0});
     res.status(200).json({message:"Logout Successfully"});
 }
+
+export const checkAuth = async (req,res)=>{
+    res.status(200).json({
+        fullName:req.user.fullName,
+        email:req.user.email,
+        profilePic:req.user.profilePic
+    });
+}
+
+
