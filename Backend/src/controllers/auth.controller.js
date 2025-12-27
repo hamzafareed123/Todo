@@ -40,6 +40,7 @@ export const Signup = async (req, res) => {
     if (newUser) {
       generateToken(newUser._id, res);
       res.status(201).json({
+        message:"SignUp Successfully",
         id: newUser._id,
         fullName: newUser.fullName,
         email: newUser.email,
@@ -73,6 +74,7 @@ export const Signin = async (req, res) => {
 
     generateToken(user._id, res);
     res.status(200).json({
+      message: "Login Successfully",
       id: user._id,
       fullName: user.fullName,
       email: user.email,
