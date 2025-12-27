@@ -1,6 +1,8 @@
+import path from "path";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
+import fs from "fs";
 
 export const Signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -82,7 +84,85 @@ export const Signin = async (req, res) => {
   }
 };
 
-export const Logout = async (_,res)=>{
-    res.cookie("jwt","",{maxAge:0});
-    res.status(200).json({message:"Logout Successfully"});
-}
+export const Logout = async (_, res) => {
+  res.cookie("jwt", "", { maxAge: 0 });
+  res.status(200).json({ message: "Logout Successfully" });
+};
+
+export const checkAuth = async (req, res) => {
+  res.status(200).json({
+    fullName: req.user.fullName,
+    email: req.user.email,
+    profilePic: req.user.profilePic,
+  });
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { fullName, email } = req.body;
+    const userId = req.user.id;
+    const file = req.file;
+
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "User Not Found" });
+    }
+
+    if (email && email !== user.email) {
+      const emailExists = await User.findOne({ email: email });
+
+      if (emailExists) {
+        return res.status(400).json({ message: "Email already in use" });
+      }
+    }
+
+    if (file && user.profilePic) {
+      const oldImage = path.join(process.cwd(), user.profilePic);
+
+      if (fs.existsSync(oldImage)) {
+        fs.unlinkSync(oldImage);
+      }
+    }
+
+    if (fullName) {
+      user.fullName = fullName;
+    }
+
+    if (email) {
+      user.email = email;
+    }
+
+    if (file) {
+      user.profilePic = `/uploads/profile-pics/${file.filename}`;
+    }
+
+    await user.save();
+
+    res
+      .status(200)
+      .json({ message: "Profile Updated Successfully", user: user });
+  } catch (error) {
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
+    console.log("error is", error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
+export const getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res.status(404).json({ message: "No User Found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: "Server Error" });
+  }
+};
