@@ -69,10 +69,10 @@ const LoginPage = () => {
               {isLogin ? (
                 <>
                   <Loader2Icon className="w-5 h-5 animate-spin" />
-                  Creating...
+                  Login...
                 </>
               ) : (
-                "Create Account"
+                "Login"
               )}
             </button>
           </form>
