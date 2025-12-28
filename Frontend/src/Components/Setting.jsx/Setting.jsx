@@ -2,7 +2,7 @@ import React from 'react'
 
 const Setting = () => {
   return (
-    <div>Setting</div>
+    <div className='text-black'>Setting</div>
   )
 }
 

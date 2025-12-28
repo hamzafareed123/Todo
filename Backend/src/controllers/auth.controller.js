@@ -3,6 +3,7 @@ import { generateToken } from "../lib/utils.js";
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import fs from "fs";
+import { generateFileUrl } from "../lib/urlGenerator.js";
 
 export const Signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -40,7 +41,7 @@ export const Signup = async (req, res) => {
     if (newUser) {
       generateToken(newUser._id, res);
       res.status(201).json({
-        message:"SignUp Successfully",
+        message: "SignUp Successfully",
         id: newUser._id,
         fullName: newUser.fullName,
         email: newUser.email,
@@ -92,10 +93,16 @@ export const Logout = async (_, res) => {
 };
 
 export const checkAuth = async (req, res) => {
+
+
+  const user = await User.findById(req.user.id).select("-password");
+  const userObject = user.toObject();
+  
+  userObject.profilePic=generateFileUrl(user.profilePic,req);
+
+
   res.status(200).json({
-    fullName: req.user.fullName,
-    email: req.user.email,
-    profilePic: req.user.profilePic,
+    ...userObject
   });
 };
 
@@ -141,9 +148,13 @@ export const updateProfile = async (req, res) => {
 
     await user.save();
 
+    const userObject = user.toObject();
+
+    userObject.profilePic = generateFileUrl(user.profilePic, req);
+
     res
       .status(200)
-      .json({ message: "Profile Updated Successfully", user: user });
+      .json({ message: "Profile Updated Successfully", ...userObject });
   } catch (error) {
     if (req.file) {
       fs.unlinkSync(req.file.path);

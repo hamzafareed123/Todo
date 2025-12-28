@@ -45,6 +45,9 @@ function App() {
           path="/login"
           element={!authUser ? <LoginPage /> : <Navigate to="/" />} 
         />
+
+        <Route 
+        path='/tasks'  />
       </Routes>
      <Toaster/> 
      </>
