@@ -93,16 +93,13 @@ export const Logout = async (_, res) => {
 };
 
 export const checkAuth = async (req, res) => {
-
-
   const user = await User.findById(req.user.id).select("-password");
   const userObject = user.toObject();
-  
-  userObject.profilePic=generateFileUrl(user.profilePic,req);
 
+  userObject.profilePic = generateFileUrl(user.profilePic, req);
 
   res.status(200).json({
-    ...userObject
+    ...userObject,
   });
 };
 
@@ -111,6 +108,20 @@ export const updateProfile = async (req, res) => {
     const { fullName, email } = req.body;
     const userId = req.user.id;
     const file = req.file;
+
+    if (!fullName) {
+      return res.status(400).json({ message: "Name is Required" });
+    }
+
+    if (!email) {
+      return res.status(400).json({ message: "Email is Required" });
+    }
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: "Email Pattern Should be Valid" });
+    }
 
     const user = await User.findById(userId).select("-password");
 
@@ -134,17 +145,11 @@ export const updateProfile = async (req, res) => {
       }
     }
 
-    if (fullName) {
-      user.fullName = fullName;
-    }
+    user.fullName = fullName ?? user.fullName;
 
-    if (email) {
-      user.email = email;
-    }
+    user.email = email ?? user.email;
 
-    if (file) {
-      user.profilePic = `/uploads/profile-pics/${file.filename}`;
-    }
+    user.profilePic = `/uploads/profile-pics/${file.filename}`;
 
     await user.save();
 

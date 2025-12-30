@@ -4,7 +4,44 @@
 
 .btn {
   @apply bg-black text-white rounded-xl py-2.5 font-medium text-sm cursor-pointer
-  hover:bg-gray-600 focus:ring-1 hover:shadow-lg transition duration-200 disabled:opacity-70 disabled:cursor-not-allowed gap-2;
+  hover:bg-gray-600 hover:shadow-lg transition duration-200 disabled:opacity-70 disabled:cursor-not-allowed gap-2;
+}
+
+.sidebar{
+  background-colr:var(--body_background);
+  color:var(--body-color)
+}
+
+.menu-icon{
+  color:var(--body-color);
+}
+
+h1{
+  color:var(--body-color);
+}
+
+.menu-item{
+  color:var(--body-color);
+}
+
+.hover:menu-item{
+  color:var(--hover_color_menu);
+}
+
+
+.form{
+  background-color:var(--body_background);
+  color:var(--body-color);
+}
+
+.cross-btn{
+  color:var(body-color);
+  
+}
+
+.setting{
+  background-color:var(--body_background);
+  color:var(--body-color);
 }
 
 

@@ -6,6 +6,7 @@ export const useTodoStore = create((set, get) => ({
   allTodos: [],
   isTodoLoading: true,
   selectedTab: "Tasks",
+  isUploading:false,
 
   setTab: (tab) => {
     set({ selectedTab: tab });
@@ -49,12 +50,15 @@ export const useTodoStore = create((set, get) => ({
 
   updateTodo: async (id, data) => {
     try {
+      set({isUploading:true});
       const response = await axiosInstance.put(`/todo/updateTodo/${id}`, data);
       toast.success(response.data.message);
      await  get().getAllTodos();
     } catch (error) {
       console.log("Error in updating Todos ", error);
       toast.error(error.response.message);
+    }finally{
+      set({isUploading:false});
     }
   },
 }));

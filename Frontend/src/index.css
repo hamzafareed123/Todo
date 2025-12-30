@@ -1,6 +1,25 @@
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  background-color:white
+  --body_background:white;
+  --body_color:black;
+  --link_color:blue;
+}
 
+[data-theme="dark"]{
+  --body_background:#1E293B;
+  --body_color:white;
+  --link_color:lightblue;
+  --hover_color_menu:#334155
+}
+
+body {
+  background-color: var(--body_background);
+  color: var(--body_color);
+
+
+}
+
+html {
+  background-color: var(--body_background);
 }
 

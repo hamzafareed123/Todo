@@ -55,7 +55,13 @@ const TodoList = () => {
     <>
       <AddTasks />
 
-      <div className=" w-full mt-10 text-black">
+      <div
+        className=" w-full mt-10 text-black"
+        style={{
+          backgroundColor: "var(--body_background)",
+          color: "var(--body_color)",
+        }}
+      >
         <div className="flex flex-col gap-6">
           <div className="flex gap-2 items-center justify-center">
             {button.map((btn) => (
@@ -64,7 +70,7 @@ const TodoList = () => {
                 onClick={() => setActiveTodo(btn.value)}
                 className={`text-md text-gray-600 px-4 py-2 rounded-lg cursor-pointer hover:text-gray-500 transition ${
                   activeTodo === btn.value
-                    ? "text-gray-950 font-semibold"
+                    ? "menu-item font-semibold"
                     : "text-gray-600"
                 }`}
               >
@@ -76,7 +82,7 @@ const TodoList = () => {
             {allTodos && allTodos.length > 0 ? (
               filterTodos().map((todo) => (
                 <div
-                  key={todo.id}
+                  key={todo._id}
                   className=" flex flex-row items-center justify-between bg-white rounded-lg p-4 shadow-md  transition"
                 >
                   <div className="flex flex-col items-start justify-start gap-1 flex-1">
@@ -117,20 +123,26 @@ const TodoList = () => {
       </div>
 
       {isModal && (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-8 w-full max-w-sm sm:max-w-md md:max-w-2xl  mx-auto shadow-lg">
+        <div
+          className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setIsModal(false)}
+        >
+          <div
+            className="form rounded-lg p-8 w-full max-w-sm sm:max-w-md md:max-w-2xl  mx-auto shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold text-black">Update Task</h2>
+              <h2 className="text-2xl font-semibold">Update Task</h2>
               <button
                 onClick={() => setIsModal(false)}
-                className="text-gray-500 hover:text-black cursor-pointer"
+                className="cross-btn cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex flex-col">
-                <label className="text-black font-medium mb-2">Todo</label>
+                <label className=" font-medium mb-2">Todo</label>
                 <input
                   type="text"
                   name="todo"
@@ -139,13 +151,13 @@ const TodoList = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, todoName: e.target.value })
                   }
-                  className="px-4 py-2 rounded-lg border border-gray-300 outline-none text-gray-700"
+                  className="px-4 py-2 rounded-lg border border-gray-300 outline-none text-gray-400"
                   required
                 />
               </div>
 
               <div className="flex flex-col">
-                <label className="text-black font-medium mb-2">
+                <label className=" font-medium mb-2">
                   Description (Optional)
                 </label>
                 <textarea
@@ -155,16 +167,16 @@ const TodoList = () => {
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  className="px-4 py-2 rounded-lg border border-gray-300 outline-none text-gray-700 resize-none"
+                  className="px-4 py-2 rounded-lg border border-gray-300 outline-none text-gray-400 resize-none"
                   rows="3"
                 />
               </div>
 
               <div className="flex flex-col">
-                <label className="text-black font-medium mb-2">Status</label>
+                <label className=" font-medium mb-2">Status</label>
 
                 <Select
-                  className="text-black cursor-pointer "
+                  className="text-black cursor-pointer"
                   options={options}
                   value={
                     formData.status
@@ -180,7 +192,7 @@ const TodoList = () => {
                 <button
                   type="button"
                   onClick={() => setIsModal(false)}
-                  className="text-black font-semibold hover:bg-gray-200 cursor-pointer rounded-sm px-3 py-2"
+                  className=" font-semibold  cursor-pointer rounded-sm px-3 py-2"
                 >
                   Cancel
                 </button>

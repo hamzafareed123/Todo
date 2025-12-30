@@ -16,30 +16,32 @@ const Sidebar = () => {
     <>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 left-4 z-50 bg-white-600 text-black p-2 rounded-lg"
+        className="md:hidden fixed top-4 left-4 z-50 menu-icon  p-2 rounded-lg "
       >
         {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
       </button>
 
       <div
-        className={`fixed md:relative w-64 h-screen bg-white shadow-xl text-black p-6 transition-all duration-300 ${
+        className={`sidebar fixed md:relative w-64 h-screen shadow-xl  p-6 transition-all duration-300  ${
           isOpen ? "left-0" : "-left-64"
         } md:left-0 z-40 ${isCollapsed ? "md:w-24" : "md:w-64"}`}
       >
         <div className="flex items-center gap-2 mb-4">
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="bg-white p-2 rounded-lg cursor-pointer hover:bg-gray-100 transition w-10 h-10 flex items-center justify-center"
+            className=" p-2 rounded-lg cursor-pointer transition w-10 h-10 flex items-center justify-center"
           >
-            <Menu className="w-5 h-5 text-black" />
+            <Menu className="w-5 h-5 menu-icon" />
           </button>
           {!isCollapsed && (
-            <span className="text-sm font-semibold text-black">Menu</span>
+            <span className="menu-icon text-sm font-semibold text-black">
+              Menu
+            </span>
           )}
         </div>
 
         {!isCollapsed && (
-          <div className="bg-white bg-opacity-10 rounded-lg p-4 mb-8">
+          <div className=" bg-opacity-10 rounded-lg p-4 mb-8">
             <div className="flex items-center justify-center flex-col gap-3">
               <img
                 src={authUser.profilePic || avatarImage}
@@ -69,7 +71,7 @@ const Sidebar = () => {
               setIsOpen(false);
               setTab("Tasks");
             }}
-            className={`flex items-center gap-3 rounded-lg hover:bg-white hover:bg-opacity-20 transition duration-200 active:bg-white active:bg-opacity-30 ${
+            className={`flex items-center gap-3 rounded-lg  hover:bg-opacity-20 transition duration-200  active:bg-opacity-30 ${
               isCollapsed ? "w-10 h-10 justify-center" : "px-4 py-3 w-full"
             }`}
             title={isCollapsed ? "My Tasks" : ""}
@@ -79,12 +81,11 @@ const Sidebar = () => {
           </Link>
 
           <Link
-          
             onClick={() => {
               setIsOpen(false);
               setTab("Setting");
             }}
-            className={`flex items-center gap-3 rounded-lg hover:bg-white hover:bg-opacity-20 transition duration-200 active:bg-white active:bg-opacity-30 ${
+            className={`flex items-center gap-3 rounded-lg  hover:bg-opacity-20 transition duration-200  active:bg-opacity-30 ${
               isCollapsed ? "w-10 h-10 justify-center" : "px-4 py-3 w-full"
             }`}
             title={isCollapsed ? "Settings" : ""}
