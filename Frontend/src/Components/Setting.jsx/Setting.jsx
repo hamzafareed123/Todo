@@ -1,10 +1,11 @@
 import React, { useRef, useState } from "react";
 import { useAuthStore } from "../../Store/auth-store";
 import avatarImage from "/avatar.png";
-import { Loader2Icon } from "lucide-react";
+import { Loader2Icon,LogOutIcon } from "lucide-react";
 
 const Setting = () => {
-  const { authUser, isUploading, updateProfile } = useAuthStore();
+  const { authUser, isUploading, updateProfile,LogOut } = useAuthStore();
+  const [isLogout,setIsLogout]= useState(false);
   const [formData, setFormData] = useState({
     profilePic: authUser?.profilePic || "",
     fullName: authUser?.fullName || "",
@@ -39,27 +40,38 @@ const Setting = () => {
     updateProfile(sendData);
   };
 
+  const handleLogout  = ()=>{
+    LogOut();
+
+  }
+
   return (
-    <div className="setting  bg-white pt-6 px-4">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold text-black mb-8">Settings</h1>
+<div className="setting bg-white pt-6 px-4 mt-10 lg:mt-0 sm:mt-10 md:mt-0">
+      <div className="max-w-3xl mx-auto">
+       
+
+       <div className="flex items-center justify-between mb-8 ">
+         <h1 className="text-3xl font-bold text-black ">Settings</h1>
+       
+         <button className="btn" onClick={(e)=>setIsLogout(true)}>  <LogOutIcon className="w-6 h-6  "/>Logout</button>
+       </div>
 
         <div className="border border-gray-300 rounded-lg p-8">
           <form onSubmit={handleSubmit}>
          
-            <div className="mb-8">
+            <div className="flex flex-col items-center justify-center mb-8">
               <label className="block text-sm font-semibold  mb-4">
                 Profile Picture
               </label>
               <button
                 type="button"
                 onClick={() => fileRef.current.click()}
-                className="relative group focus:outline-none cursor-pointer"
+                className="relative group cursor-pointer"
               >
                 <img
                   src={formData?.profilePic || avatarImage}
                   alt="Profile"
-                  className="w-32 h-32 rounded-lg object-cover border border-gray-300"
+                  className="w-32 h-32 rounded-full object-cover "
                 />
 
                 <div
@@ -133,6 +145,31 @@ const Setting = () => {
           </form>
         </div>
       </div>
+
+      {isLogout && (
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="logout-modal rounded-lg p-4 py-6 w-full max-w-sm sm:max-w-sm md:max-w-md mx-auto shadow-lg">
+            <h2 className=""> Are you sure you want to logout?</h2>
+            <div className="flex justify-end gap-8 mt-6">
+              <button
+                onClick={() => setIsLogout(false)}
+                className=" cursor-pointer px-2 py-1 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setIsLogout(false);
+                  handleLogout();
+                }}
+                className="btn"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

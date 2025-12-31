@@ -2,14 +2,12 @@ import React from "react";
 import { useAuthStore } from "../Store/auth-store";
 import { useEffect } from "react";
 import { useState } from "react";
-import { ListTodo,Loader2Icon } from "lucide-react";
+import { ListTodo, Loader2Icon } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const { Login, isLogin } = useAuthStore();
-
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -64,7 +62,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLogin}
-              className="btn w-full flex items-center justify-center"
+              className="btn w-full flex items-center justify-center mt-5"
             >
               {isLogin ? (
                 <>
@@ -75,6 +73,14 @@ const LoginPage = () => {
                 "Login"
               )}
             </button>
+            <p className="text-sm text-right p-1">
+              <Link
+                to="/forgot-password"
+                className="text-blue-600 font-semibold hover:text-blue-700 transition"
+              >
+                Forgot Password?
+              </Link>
+            </p>
           </form>
 
           <div className="relative">
@@ -85,9 +91,8 @@ const LoginPage = () => {
               <span className="px-2 bg-white text-gray-500">or</span>
             </div>
           </div>
-
           <p className="text-center text-gray-600">
-            Create  account?{" "}
+            Create account?{" "}
             <Link
               to="/signup"
               className="text-blue-600 font-semibold hover:text-blue-700 transition"

@@ -73,4 +73,14 @@ export const useAuthStore = create((set, get) => ({
       toast.error(error.response.data.message || "Failed to update Profile");
     }
   },
+
+  forgotPassword: async (data) => {
+    try {
+      const response = await axiosInstance.post("/auth/forgot-password", data);
+      toast.success(response.data.message);
+    } catch (error) {
+      console.log("Error in Forgot password", error);
+      toast.error(error.response.data.message || "Failed to send reset email");
+    }
+  },
 }));

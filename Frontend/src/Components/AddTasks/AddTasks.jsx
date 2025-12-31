@@ -33,8 +33,10 @@ const AddTasks = () => {
   };
 
   const handleToggle = (e) => {
-    setIsDark(!isDark);
-    const theme = isDark ? "dark" : "light";
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
+    const theme = newIsDark ? "dark" : "light";
+
     document.documentElement.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   };
@@ -68,16 +70,16 @@ const AddTasks = () => {
       </div>
 
       {isModal && (
-        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50"
-        onClick={()=>setIsModal(false)}>
+        <div
+          className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setIsModal(false)}
+        >
           <div
             className="form rounded-lg p-8 w-full max-w-sm sm:max-w-md md:max-w-2xl  mx-auto shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-semibold ">
-                Add New Task
-              </h2>
+              <h2 className="text-2xl font-semibold ">Add New Task</h2>
               <button
                 onClick={() => setIsModal(false)}
                 className="text-gray-500 hover:text-black cursor-pointer"

@@ -6,6 +6,8 @@ import {
   checkAuth,
   updateProfile,
   getUserProfile,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/auth.controller.js";
 import { arjectProtect } from "../middleware/arject.middleware.js";
 import protectedRoute from "../middleware/auth.middleware.js";
@@ -26,5 +28,7 @@ router.put(
   updateProfile
 );
 router.get("/userProfile", protectedRoute, getUserProfile);
+router.post("/forgot-password", forgotPassword);
+router.post("/reset-password/:id/:token", resetPassword);
 
 export default router;
