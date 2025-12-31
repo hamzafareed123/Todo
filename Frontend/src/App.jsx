@@ -7,6 +7,8 @@ import { useAuthStore } from "./Store/auth-store";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "react-hot-toast";
+import ForgotPasswordPage from "./Pages/ForgotPasswordPage";
+import ResetPasswrodPage from "./Pages/ResetPasswrodPage";
 
 function App() {
   const { authUser, isCheckingAuth, checkAuth } = useAuthStore();
@@ -14,7 +16,6 @@ function App() {
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
-
 
   if (isCheckingAuth) {
     return (
@@ -30,8 +31,7 @@ function App() {
   console.log("authUser", authUser);
 
   return (
-    
-     <>
+    <>
       <Routes>
         <Route
           path="/"
@@ -43,15 +43,17 @@ function App() {
         />
         <Route
           path="/login"
-          element={!authUser ? <LoginPage /> : <Navigate to="/" />} 
+          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
         />
 
-        <Route 
-        path='/tasks'  />
+        <Route path="/tasks" />
+
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+        <Route path="/reset-password" element={<ResetPasswrodPage />} />
       </Routes>
-     <Toaster/> 
-     </>
-   
+      <Toaster />
+    </>
   );
 }
 

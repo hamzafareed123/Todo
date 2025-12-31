@@ -22,7 +22,7 @@ const Sidebar = () => {
       </button>
 
       <div
-        className={`sidebar fixed md:relative w-64 h-screen shadow-xl  p-6 transition-all duration-300  ${
+        className={`sidebar-modal fixed md:relative w-64 h-screen shadow-xl  p-6 transition-all duration-300  ${
           isOpen ? "left-0" : "-left-64"
         } md:left-0 z-40 ${isCollapsed ? "md:w-24" : "md:w-64"}`}
       >
@@ -31,7 +31,7 @@ const Sidebar = () => {
             onClick={() => setIsCollapsed(!isCollapsed)}
             className=" p-2 rounded-lg cursor-pointer transition w-10 h-10 flex items-center justify-center"
           >
-            <Menu className="w-5 h-5 menu-icon" />
+            <Menu className="w-5 h-5 menu-icon hidden lg:block sm:hidden" />
           </button>
           {!isCollapsed && (
             <span className="menu-icon text-sm font-semibold text-black">
@@ -98,7 +98,7 @@ const Sidebar = () => {
 
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 md:hidden z-30"
+          className="sidebar fixed inset-0 bg-opacity-50 md:hidden z-30"
           onClick={() => setIsOpen(false)}
         />
       )}

@@ -14,3 +14,8 @@ export const generateToken = async (userId,res)=>{
     return token;
 }
 
+
+export const generateResetToken= (userId)=>{
+    const resetToken = jwt.sign({userId},ENV.JWT_SECRET,{expiresIn:"1h"});
+    return resetToken;
+}

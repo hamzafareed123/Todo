@@ -22,9 +22,9 @@ const TodoList = () => {
 
   const button = [
     { value: "all", name: "All" },
-    { value: "pending", name: "Active" },
-    { value: "completed", name: "Completed" },
-    { value: "canceled", name: "Canceled" },
+    { value: "pending", name: "IN PROGRESS" },
+    { value: "completed", name: "COMPLETED" },
+    { value: "canceled", name: "CANCELED" },
   ];
 
   useEffect(() => {
