@@ -115,3 +115,23 @@ export const updateTodo = async (req, res) => {
     return res.status(500).json({ message: "Server Error" });
   }
 };
+
+
+export const allTods = async (req,res)=>{
+  try {
+    
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+
+    const startIndex = (page-1)*limit;
+ 
+
+    const todos = await Todo.find().skip(startIndex).limit(limit);
+
+    const total = await Todo.countDocuments();
+    res.status(200).json({page,limit,total,todos});
+  } catch (error) {
+    console.log("error in fetching all todos",error);
+    return res.status(500).json({message:"Server Error"});
+  }
+}

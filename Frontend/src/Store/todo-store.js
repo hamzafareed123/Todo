@@ -6,7 +6,7 @@ export const useTodoStore = create((set, get) => ({
   allTodos: [],
   isTodoLoading: true,
   selectedTab: "Tasks",
-  isUploading:false,
+  isUploading: false,
 
   setTab: (tab) => {
     set({ selectedTab: tab });
@@ -50,15 +50,29 @@ export const useTodoStore = create((set, get) => ({
 
   updateTodo: async (id, data) => {
     try {
-      set({isUploading:true});
+      set({ isUploading: true });
       const response = await axiosInstance.put(`/todo/updateTodo/${id}`, data);
       toast.success(response.data.message);
-     await  get().getAllTodos();
+      await get().getAllTodos();
     } catch (error) {
       console.log("Error in updating Todos ", error);
       toast.error(error.response.message);
-    }finally{
-      set({isUploading:false});
+    } finally {
+      set({ isUploading: false });
+    }
+  },
+
+  getPageTodos: async (page, limit) => {
+    try {
+      set({ isTodoLoading: true });
+      const response = await axiosInstance.get(
+        `/todo/allTodos?page=${page}&limit=${limit}`
+      );
+      set({ allTodos: response.data.todos });
+    } catch {
+      console.log("error in fetching paginated todos");
+    } finally {
+      set({ isTodoLoading: false });
     }
   },
 }));
