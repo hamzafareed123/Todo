@@ -8,6 +8,7 @@ import { sendMail } from "../email/emailHandler.js";
 import { generateEmailHTML } from "../email/emailTemplate.js";
 import { ENV } from "../lib/env.js";
 import jwt from "jsonwebtoken"
+import { resetEmailTemplate } from "../email/resetEmailTemplate.js";
 
 export const Signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -220,9 +221,7 @@ export const forgotPassword = async (req, res) => {
       to: user.email,
       subject: "password Reset Request",
       text: `Hello ${user.fullName},\n\nYou requested for a password reset. Please use the following link to reset your password:\n\n${resetLink}\n\nIf you did not request this, please ignore this email.\n\nBest Regards,\nTodo App Team`,
-      html: `<p>Hello ${user.fullName},</p>
-      <p>You requested for a password reset. Please use the following link to reset your password:</p>
-      <a href="${resetLink}">Reset Password</a>`,
+      html: resetEmailTemplate(user.fullName, resetLink),
     });
 
     res
@@ -244,8 +243,11 @@ export const resetPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     
+    if(!newPassword || newPassword.length<4){
+      return res.status(400).json({message:"Password length should be at least 4"});
+    }
     const decoded=jwt.verify(token,ENV.JWT_SECRET);
-    if(decoded.userId!==user._id.toString()){
+    if(decoded.userId.toString()!==user._id.toString()){
       return res.status(400).json({message:"Invalid or Expired Token"});
     }
 

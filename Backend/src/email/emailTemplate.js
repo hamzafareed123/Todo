@@ -25,13 +25,13 @@ export function generateEmailHTML(fullName) {
     <body>
       <div style="max-width: 640px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);">
         
-        <!-- Header -->
+
         <div style="background: linear-gradient(to right, #000000, #1f2937); color: #ffffff; padding: 48px 32px; text-align: center;">
           <h1 style="font-size: 36px; font-weight: 700; margin: 0; letter-spacing: 1px;">✓ Todo App</h1>
           <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Welcome Aboard!</p>
         </div>
 
-        <!-- Content -->
+     
         <div style="padding: 40px 32px; color: #1f2937;">
           
           <div style="margin-bottom: 24px;">
@@ -61,7 +61,7 @@ export function generateEmailHTML(fullName) {
           </div>
 
           <div style="text-align: center; margin: 32px 0;">
-            <a href="https://todoapp.com/dashboard" style="display: inline-block; background-color: #000000; color: #ffffff; padding: 12px 32px; border-radius: 6px; font-weight: 600; text-decoration: none; transition: background-color 0.3s ease;">
+            <a href="http://localhost:5173/" style="display: inline-block; background-color: #000000; color: #ffffff; padding: 12px 32px; border-radius: 6px; font-weight: 600; text-decoration: none; transition: background-color 0.3s ease;">
               Get Started
             </a>
           </div>

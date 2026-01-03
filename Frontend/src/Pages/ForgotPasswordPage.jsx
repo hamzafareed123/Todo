@@ -21,7 +21,7 @@ const ForgotPasswordPage = () => {
         </p>
         <form onSubmit={handleSubmit} className="space-y-2 mt-2">
           <div className="flex flex-col gap-2">
-            <label htmlFor="email" className="text-gray-700">
+            <label htmlFor="email" className="text-gray-700 text-sm">
               Email
             </label>
             <input

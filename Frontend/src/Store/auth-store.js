@@ -1,6 +1,10 @@
 import { axiosInstance } from "../lib/axios";
 import { create } from "zustand";
 import toast from "react-hot-toast";
+
+
+
+
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isCheckingAuth: false,
@@ -80,7 +84,21 @@ export const useAuthStore = create((set, get) => ({
       toast.success(response.data.message);
     } catch (error) {
       console.log("Error in Forgot password", error);
-      toast.error(error.response.data.message || "Failed to send reset email");
+      toast.error(error.response?.message || "Failed to send reset email");
+    }
+  },
+
+  resetPassword: async (data) => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
+    const id = params.get("id");
+    try {
+      const response = await axiosInstance.post(`/auth/reset-password/${id}/${token}`,  data );
+      toast.success(response.data.message);
+      return {success:true};
+    } catch (error) {
+      console.log("Error in Reset Passwod");
+      toast.error(error.response.data.message || "Failed to reset password");
     }
   },
 }));
