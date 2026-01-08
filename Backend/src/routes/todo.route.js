@@ -6,7 +6,8 @@ import {
   getAllTodo,
   updateTodo,
   getTodoById,
-  allTods
+  allTods,
+  searchTodos
 } from "../controllers/todo.controller.js";
 
 const router = express.Router();
@@ -17,6 +18,7 @@ router.get("/getAllTodos", protectedRoute, getAllTodo);
 router.put("/updateTodo/:id", protectedRoute, updateTodo);
 router.get("/getTodo/:id", protectedRoute, getTodoById);
 router.get("/allTodos", protectedRoute, allTods);
+router.get("/searchTodos",protectedRoute,searchTodos);
 
 
 export default router;

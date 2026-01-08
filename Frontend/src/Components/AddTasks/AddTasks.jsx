@@ -2,23 +2,32 @@ import { Moon, Sun, X } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import { useTodoStore } from "../../Store/todo-store";
+import { useDebounce } from "../../hooks/useDebounce";
 
 const AddTasks = () => {
   const [isModal, setIsModal] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [search, setSearch] = useState(""); // this is for immediately showing on screen
+
   const [formData, setFormData] = useState({
     todoName: "",
     description: "",
     status: null,
   });
 
-  const { addTodo } = useTodoStore();
+  const { addTodo, setInputValue } = useTodoStore();
 
   const options = [
     { value: "pending", label: "Pending" },
     { value: "completed", label: "Completed" },
     { value: "canceled", label: "Canceled" },
   ];
+
+  const searchDebounce = useDebounce((value) => {
+    console.log("search value is:", value);
+
+    setInputValue(value);
+  }, 500);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -30,6 +39,14 @@ const AddTasks = () => {
       description: "",
       status: null,
     });
+  };
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+
+    setSearch(value);
+
+    searchDebounce(value);
   };
 
   const handleToggle = (e) => {
@@ -59,6 +76,8 @@ const AddTasks = () => {
         <h1 className=" text-3xl font-semibold mt-4">My Tasks</h1>
         <div className="flex flex-row mt-8 gap-6 w-full max-w-xl px-6">
           <input
+            value={search}
+            onChange={handleSearchChange}
             type="text"
             placeholder="Search your task here..."
             className="flex-1 px-4 py-2 rounded-2xl border-none outline-none bg-white bg-opacity-100 placeholder-gray-400 text-gray-700 shadow-md"
