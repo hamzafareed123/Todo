@@ -8,13 +8,13 @@ import Setting from "../Components/Setting.jsx/Setting";
 
 const TodoContainer = () => {
 
-  const { selectedTab, setTab,getAllTodos,allTodos } = useTodoStore();
-  console.log("todos are ",allTodos)
+  const { selectedTab,getAllTodos, } = useTodoStore();
+
 
   useEffect(()=>{
     getAllTodos();
   },[getAllTodos])
-  console.log(selectedTab);
+
   return (
     <div className="flex h-screen" >
       <Sidebar />

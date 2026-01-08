@@ -49,21 +49,21 @@ export const getAllTodo = async (req, res) => {
   }
 };
 
-export const getTodoById = async (req,res)=>{
+export const getTodoById = async (req, res) => {
   try {
-    const {id} = req.params;
-    
-    const todo= await Todo.findById(id);
+    const { id } = req.params;
 
-    if(!todo){
-      return res.status(404).json({message:"No todo found"});
+    const todo = await Todo.findById(id);
+
+    if (!todo) {
+      return res.status(404).json({ message: "No todo found" });
     }
 
     res.status(200).json(todo);
   } catch (error) {
-    return res.status(500).json({messag:"Server Error"});
+    return res.status(500).json({ messag: "Server Error" });
   }
-}
+};
 
 export const deleteTodo = async (req, res) => {
   try {
@@ -116,22 +116,56 @@ export const updateTodo = async (req, res) => {
   }
 };
 
-
-export const allTods = async (req,res)=>{
+export const allTods = async (req, res) => {
   try {
-    
+    const userId = req.user.id;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
 
-    const startIndex = (page-1)*limit;
- 
+    const startIndex = (page - 1) * limit;
 
-    const todos = await Todo.find().skip(startIndex).limit(limit);
+    const todos = await Todo.find({ userId }).skip(startIndex).limit(limit);
 
-    const total = await Todo.countDocuments();
-    res.status(200).json({page,limit,total,todos});
+    const total = await Todo.countDocuments({ userId });
+    res.status(200).json({ page, limit, total, todos });
   } catch (error) {
-    console.log("error in fetching all todos",error);
-    return res.status(500).json({message:"Server Error"});
+    console.log("error in fetching all todos", error);
+    return res.status(500).json({ message: "Server Error" });
   }
-}
+};
+
+export const searchTodos = async (req, res) => {
+  try {
+    
+    const userId = req.user.id;
+    const { query,page=1,limit=5} = req.query;
+
+   
+
+    const skip= parseInt((page-1)*limit);
+
+    const totalTodos = await Todo.countDocuments({
+      userId,
+      $or:[
+      {todoName:{$regex:query,$options:"i"}},
+      {description:{$regex:query,$options:"i"}}
+      ]
+    })
+    const todos = await Todo.find({
+      userId,
+      $or: [
+        { todoName: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } }
+      ]
+    }).skip(skip).limit(parseInt(limit))
+
+    // if (!todos || todos.length === 0) {
+    //   return res.status(404).json({ message: "No todos found" });
+    // }
+
+    res.status(200).json({todos:todos,total:totalTodos});
+  } catch (error) {
+    console.log("error in searching todos", error);
+    return res.status(500).json({ message: "Server Error" });
+  }
+};

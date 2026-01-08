@@ -7,6 +7,10 @@ export const useTodoStore = create((set, get) => ({
   isTodoLoading: true,
   selectedTab: "Tasks",
   isUploading: false,
+  totalTodos: 0,
+  inputValue: "",
+  totalSearchCount: 0,
+  error: null,
 
   setTab: (tab) => {
     set({ selectedTab: tab });
@@ -68,10 +72,41 @@ export const useTodoStore = create((set, get) => ({
       const response = await axiosInstance.get(
         `/todo/allTodos?page=${page}&limit=${limit}`
       );
+
       set({ allTodos: response.data.todos });
+      set({ totalTodos: response.data.total });
     } catch {
       console.log("error in fetching paginated todos");
     } finally {
+      set({ isTodoLoading: false });
+    }
+  },
+
+  setInputValue: (value) => {
+    set({ inputValue: value });
+    if (!value || value.trim() === "") {
+      set({ error: null });
+      get().getPageTodos(1, 5);
+    } else {
+      get().searchTodos(value, 1, 5);
+    }
+  },
+
+  searchTodos: async (query, page, limit) => {
+    try {
+      set({ isTodoLoading: true });
+      const response = await axiosInstance.get(
+        `/todo/searchTodos?query=${query}&page=${page}&limit=${limit}`
+      );
+
+      set({
+        allTodos: response.data.todos,
+        error: response.data.todos.length === 0 ? "No todos found" : null,
+        totalSearchCount: response.data.total,
+        isTodoLoading: false,
+      });
+    } catch (error) {
+      console.log("Error in searching todos", error);
       set({ isTodoLoading: false });
     }
   },

@@ -6,9 +6,11 @@ import EmptyTodoList from "../EmptyTodoList/EmptyTodoList";
 import AddTasks from "../AddTasks/AddTasks";
 import { X } from "lucide-react";
 import Select from "react-select";
+import Pagination from "../Pagination/Pagination.jsx";
 
 const TodoList = () => {
-  const { allTodos, getAllTodos, deleteTodo, updateTodo } = useTodoStore();
+  const { allTodos, getPageTodos, deleteTodo, updateTodo, error } =
+    useTodoStore();
   const [activeTodo, setActiveTodo] = useState("all");
   const [isModal, setIsModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -18,7 +20,7 @@ const TodoList = () => {
     status: null,
   });
 
-  console.log("todos are ", allTodos);
+  console.log("Error is :", error);
 
   const button = [
     { value: "all", name: "All" },
@@ -28,7 +30,7 @@ const TodoList = () => {
   ];
 
   useEffect(() => {
-    getAllTodos();
+    getPageTodos(1, 5);
   }, []);
 
   const filterTodos = () => {
@@ -50,6 +52,8 @@ const TodoList = () => {
     { value: "completed", label: "Completed" },
     { value: "canceled", label: "Canceled" },
   ];
+
+  console.log("Render condition - error:", error, "allTodos.length:", allTodos?.length);
 
   return (
     <>
@@ -79,42 +83,52 @@ const TodoList = () => {
             ))}
           </div>
           <div className="w-full space-y-4 mx-auto max-w-2xl min-h-96">
-            {allTodos && allTodos.length > 0 ? (
-              filterTodos().map((todo) => (
-                <div
-                  key={todo._id}
-                  className=" flex flex-row items-center justify-between bg-white rounded-lg p-4 shadow-md  transition"
-                >
-                  <div className="flex flex-col items-start justify-start gap-1 flex-1">
-                    <h5 className="text-lg font-semibold text-black">
-                      {todo.todoName}
-                    </h5>
-                    <p className="text-sm text-gray-600">{todo.description}</p>
+            
+            { error ? (
+              
+              <p className="text-center text-gray-500 mt-10">{error}</p>
+            ) : allTodos && allTodos.length > 0 ? (
+              <>
+           
+                {filterTodos().map((todo) => (
+                  <div
+                    key={todo._id}
+                    className=" flex flex-row items-center justify-between bg-white rounded-lg p-4 shadow-md  transition"
+                  >
+                    <div className="flex flex-col items-start justify-start gap-1 flex-1">
+                      <h5 className="text-lg font-semibold text-black">
+                        {todo.todoName}
+                      </h5>
+                      <p className="text-sm text-gray-600">
+                        {todo.description}
+                      </p>
+                    </div>
+                    <div className="flex flex-row items-center justify-center gap-4 ml-4">
+                      <button className="p-2  rounded-lg transition cursor-pointer text-black hover:text-gray-500">
+                        <Edit2Icon
+                          className="w-5 h-5"
+                          onClick={() => {
+                            setIsModal(true);
+                            setEditingId(todo._id);
+                            setFormData({
+                              todoName: todo.todoName,
+                              description: todo.description,
+                              status: todo.status,
+                            });
+                          }}
+                        />
+                      </button>
+                      <button className="p-2  rounded-lg transition cursor-pointer text-black hover:text-gray-500">
+                        <Trash2Icon
+                          className="w-5 h-5"
+                          onClick={() => deleteTodo(todo._id)}
+                        />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex flex-row items-center justify-center gap-4 ml-4">
-                    <button className="p-2  rounded-lg transition cursor-pointer text-black hover:text-gray-500">
-                      <Edit2Icon
-                        className="w-5 h-5"
-                        onClick={() => {
-                          setIsModal(true);
-                          setEditingId(todo._id);
-                          setFormData({
-                            todoName: todo.todoName,
-                            description: todo.description,
-                            status: todo.status,
-                          });
-                        }}
-                      />
-                    </button>
-                    <button className="p-2  rounded-lg transition cursor-pointer text-black hover:text-gray-500">
-                      <Trash2Icon
-                        className="w-5 h-5"
-                        onClick={() => deleteTodo(todo._id)}
-                      />
-                    </button>
-                  </div>
-                </div>
-              ))
+                ))}
+                <Pagination />
+              </>
             ) : (
               <EmptyTodoList />
             )}
