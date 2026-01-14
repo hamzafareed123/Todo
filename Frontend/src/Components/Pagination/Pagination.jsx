@@ -35,7 +35,7 @@ const Pagination = () => {
   };
 
   return (
-    <div className="text-black  w-full mt-6 ">
+    <div className="  w-full mt-6 ">
       {total > 1 && (
         <div className="flex gap-4 items-center justify-between">
           <p>

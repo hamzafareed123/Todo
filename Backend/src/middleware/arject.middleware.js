@@ -1,5 +1,6 @@
 import { isSpoofedBot } from "@arcjet/inspect";
 import aj from "../lib/arject.js";
+import { customError } from "../lib/customError.js";
 
 export const arjectProtect = async (req, res, next) => {
   try {
@@ -7,25 +8,21 @@ export const arjectProtect = async (req, res, next) => {
 
     if (decision.isDenied()) {
       if (decision.reason.isRateLimit()) {
-        return res
-          .status(429)
-          .json({ message: "Rate limit reached. Please try again later" });
+        throw new customError(
+          "Rate limit reached. Please try again later",
+          429
+        );
       } else if (decision.reason.isBot()) {
-        return res.status(403).json({ message: "Bot access Denied" });
+        throw new customError("Bot access Denied", 403);
       } else if (decision.results.some(isSpoofedBot)) {
-        return res
-          .status(403)
-          .json({ message: "Malicious Boot Activity detected" });
+        throw new customError("Malicious Boot Activity detected", 403);
       } else {
-        return res
-          .status(403)
-          .json({ message: "Access Denied By Security Policies" });
+        throw new customError("Access Denied By Security Policies", 403);
       }
     }
 
     next();
   } catch (error) {
-    console.log("Erro in arject ", error);
-    return res.status(500).json({ message: "Security Check Failed" });
+    return next(new customError("security check Failed", 500));
   }
 };

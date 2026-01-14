@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ListTodo, Loader2Icon } from "lucide-react";
 import { useAuthStore } from "../Store/auth-store";
+import GoogleLoginButton from "../Components/GoogleLoginButton/GoogleLoginButton";
 
 const SignUpPage = () => {
   const { isSignUp, Signup } = useAuthStore();
@@ -18,7 +19,7 @@ const SignUpPage = () => {
   };
 
   return (
-  <div className="h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 sm:p-6 md:p-8">
+    <div className="h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4 sm:p-6 md:p-8">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-2xl p-4 space-y-6">
           <div className="text-center space-y-2">
@@ -101,16 +102,18 @@ const SignUpPage = () => {
               <span className="px-2 bg-white text-gray-500">or</span>
             </div>
           </div>
-
-          <p className="text-center text-gray-600">
-            Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-blue-600 font-semibold hover:text-blue-700 transition"
-            >
-              Login
-            </Link>
-          </p>
+          <div className="flex flex-col gap-2 items-center justifiy-center">
+            <p className="text-center text-gray-600">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-blue-600 font-semibold hover:text-blue-700 transition"
+              >
+                Login
+              </Link>
+            </p>
+            <GoogleLoginButton />
+          </div>
         </div>
       </div>
     </div>

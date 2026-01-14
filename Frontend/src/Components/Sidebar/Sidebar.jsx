@@ -22,7 +22,7 @@ const Sidebar = () => {
       </button>
 
       <div
-        className={`sidebar-modal fixed md:relative w-64 h-screen shadow-xl  p-6 transition-all duration-300  ${
+        className={`sidebar-modal fixed md:relative w-64 h-screen shadow-2xl  p-6 transition-all duration-300  ${
           isOpen ? "left-0" : "-left-64"
         } md:left-0 z-40 ${isCollapsed ? "md:w-24" : "md:w-64"}`}
       >
