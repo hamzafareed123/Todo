@@ -15,7 +15,7 @@ import upload from "../lib/multer.js";
 
 const router = express.Router();
 
-router.use(arjectProtect);
+// router.use(arjectProtect);
 router.post("/signup", Signup);
 router.post("/signin", Signin);
 router.post("/logout", Logout);

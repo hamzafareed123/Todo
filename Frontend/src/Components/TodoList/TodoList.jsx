@@ -20,7 +20,7 @@ const TodoList = () => {
     status: null,
   });
 
-  console.log("Error is :", error);
+ 
 
   const button = [
     { value: "all", name: "All" },
@@ -53,7 +53,7 @@ const TodoList = () => {
     { value: "canceled", label: "Canceled" },
   ];
 
-  console.log("Render condition - error:", error, "allTodos.length:", allTodos?.length);
+ 
 
   return (
     <>
@@ -72,7 +72,7 @@ const TodoList = () => {
               <button
                 key={btn.name}
                 onClick={() => setActiveTodo(btn.value)}
-                className={`text-md text-gray-600 px-4 py-2 rounded-lg cursor-pointer hover:text-gray-500 transition ${
+                className={`text-xs sm:text-sm lg:text-md text-gray-600 px-4 py-2 rounded-lg cursor-pointer hover:text-gray-500 transition ${
                   activeTodo === btn.value
                     ? "menu-item font-semibold"
                     : "text-gray-600"

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const userSchema = new mongoose.Schema({
     fullName:{
@@ -14,12 +15,21 @@ const userSchema = new mongoose.Schema({
 
     password:{
         type:String,
-        required:true,
     },
 
     profilePic:{
         type:String,
         default:""
+    },
+
+    provider:{
+        type:String,
+        enum:["local","google"],
+        default:"local"
+    },
+
+    googleId:{
+        type:String
     }
 },{timestamps:true})
 

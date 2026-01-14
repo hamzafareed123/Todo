@@ -1,20 +1,22 @@
 import Todo from "../models/Todo.js";
+import { customError } from "../lib/customError.js";
 
-export const addTodo = async (req, res) => {
+export const addTodo = async (req, res, next) => {
   try {
     const { todoName, description, status } = req.body;
     const userId = req.user.id;
 
     if (!todoName || todoName.trim() === "") {
-      return res.status(400).json({ message: "todo name is required" });
+      throw new customError("todo name is required", 400);
     }
 
     const validateStatus = ["pending", "completed", "canceled"];
 
     if (!status && !validateStatus.includes(status)) {
-      return res.status(400).json({
-        message: "Status must be 'pending', 'completed', or 'canceled'",
-      });
+      throw new customError(
+        "Status must be 'pending', 'completed', or 'canceled'",
+        400
+      );
     }
 
     const newTodo = await Todo.create({
@@ -25,19 +27,18 @@ export const addTodo = async (req, res) => {
     });
 
     if (!newTodo) {
-      return res.status(404).json({ message: "Error in Creating Todo" });
+      throw new customError("Error in Creating Todo", 404);
     }
 
     res
       .status(201)
       .json({ message: "Todo Created Successfully", todo: newTodo });
   } catch (error) {
-    console.log("error in todo", error);
-    return res.status(500).json({ message: "Error in Server" });
+    next(error);
   }
 };
 
-export const getAllTodo = async (req, res) => {
+export const getAllTodo = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
@@ -45,50 +46,49 @@ export const getAllTodo = async (req, res) => {
 
     return res.status(200).json(allTodo);
   } catch (error) {
-    return res.status(500).json({ message: "Server Error" });
+    next(error);
   }
 };
 
-export const getTodoById = async (req, res) => {
+export const getTodoById = async (req, res, next) => {
   try {
     const { id } = req.params;
 
     const todo = await Todo.findById(id);
 
     if (!todo) {
-      return res.status(404).json({ message: "No todo found" });
+      throw new customError("No todo found", 404);
     }
 
     res.status(200).json(todo);
   } catch (error) {
-    return res.status(500).json({ messag: "Server Error" });
+    next(error);
   }
 };
 
-export const deleteTodo = async (req, res) => {
+export const deleteTodo = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
 
     const todo = await Todo.findById(id);
     if (todo.userId.toString() !== userId) {
-      return res.status(403).json({ message: "Aunauthorize" });
+      throw new customError("Aunauthorize", 403);
     }
 
     const deleteTodo = await Todo.findByIdAndDelete(id);
 
     if (!deleteTodo) {
-      return res.status(404).json({ messag: "Error in Deleteing Todo" });
+      throw new customError("Error in Deleteing Todo", 404);
     }
 
     res.status(200).json({ message: "Todo Deleted Successfully" });
   } catch (error) {
-    console.log("Error in deleting todo", error);
-    return res.status(500).json({ message: "Server Error" });
+    next(error);
   }
 };
 
-export const updateTodo = async (req, res) => {
+export const updateTodo = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
@@ -96,11 +96,11 @@ export const updateTodo = async (req, res) => {
     const todo = await Todo.findById(id);
 
     if (!todo) {
-      return res.status(404).json({ message: "Todo not found" });
+      throw new customError("Todo not found", 404);
     }
 
     if (todo.userId.toString() !== userId) {
-      return res.status(403).json({ message: "Unauthorize" });
+      throw new customError("Unauthorize", 403);
     }
 
     const updatedTodo = await Todo.findByIdAndUpdate(id, req.body, {
@@ -111,12 +111,11 @@ export const updateTodo = async (req, res) => {
       .status(200)
       .json({ message: "Updated Successfully", todo: updatedTodo });
   } catch (error) {
-    console.log("error in updating todo", error);
-    return res.status(500).json({ message: "Server Error" });
+    next(error);
   }
 };
 
-export const allTods = async (req, res) => {
+export const allTods = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const page = parseInt(req.query.page) || 1;
@@ -129,43 +128,40 @@ export const allTods = async (req, res) => {
     const total = await Todo.countDocuments({ userId });
     res.status(200).json({ page, limit, total, todos });
   } catch (error) {
-    console.log("error in fetching all todos", error);
-    return res.status(500).json({ message: "Server Error" });
+    next(error);
   }
 };
 
-export const searchTodos = async (req, res) => {
+export const searchTodos = async (req, res, next) => {
   try {
-    
     const userId = req.user.id;
-    const { query,page=1,limit=5} = req.query;
+    const { query, page = 1, limit = 5 } = req.query;
 
-   
-
-    const skip= parseInt((page-1)*limit);
+    const skip = parseInt((page - 1) * limit);
 
     const totalTodos = await Todo.countDocuments({
       userId,
-      $or:[
-      {todoName:{$regex:query,$options:"i"}},
-      {description:{$regex:query,$options:"i"}}
-      ]
-    })
+      $or: [
+        { todoName: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+      ],
+    });
     const todos = await Todo.find({
       userId,
       $or: [
         { todoName: { $regex: query, $options: "i" } },
-        { description: { $regex: query, $options: "i" } }
-      ]
-    }).skip(skip).limit(parseInt(limit))
+        { description: { $regex: query, $options: "i" } },
+      ],
+    })
+      .skip(skip)
+      .limit(parseInt(limit));
 
     // if (!todos || todos.length === 0) {
     //   return res.status(404).json({ message: "No todos found" });
     // }
 
-    res.status(200).json({todos:todos,total:totalTodos});
+    res.status(200).json({ todos: todos, total: totalTodos });
   } catch (error) {
-    console.log("error in searching todos", error);
-    return res.status(500).json({ message: "Server Error" });
+    next(error);
   }
 };

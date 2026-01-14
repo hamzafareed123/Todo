@@ -148,7 +148,7 @@ const Setting = () => {
 
       {isLogout && (
         <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="logout-modal rounded-lg p-4 py-6 w-full max-w-sm sm:max-w-sm md:max-w-md mx-auto shadow-lg">
+          <div className="logout-modal rounded-lg p-4 py-6  w-full max-w-xs sm:max-w-xs md:max-w-md mx-auto shadow-lg">
             <h2 className=""> Are you sure you want to logout?</h2>
             <div className="flex justify-end gap-8 mt-6">
               <button

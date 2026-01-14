@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { ListTodo, Loader2Icon } from "lucide-react";
 import { Link } from "react-router-dom";
+import GoogleLoginButton from "../Components/GoogleLoginButton/GoogleLoginButton";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -91,15 +92,18 @@ const LoginPage = () => {
               <span className="px-2 bg-white text-gray-500">or</span>
             </div>
           </div>
-          <p className="text-center text-gray-600">
-            Create account?{" "}
-            <Link
-              to="/signup"
-              className="text-blue-600 font-semibold hover:text-blue-700 transition"
-            >
-              Signup
-            </Link>
-          </p>
+          <div className="flex flex-col items-center justify-center gap-2">
+            <p className="text-center text-gray-600">
+              Create account?{" "}
+              <Link
+                to="/signup"
+                className="text-blue-600 font-semibold hover:text-blue-700 transition"
+              >
+                Signup
+              </Link>
+            </p>
+            <GoogleLoginButton />
+          </div>
         </div>
       </div>
     </div>

@@ -1,8 +1,9 @@
 import multer from "multer";
 import fs from "fs";
 import path from "path";
+import { customError } from "./customError.js";
 
-const uploadDir = "uploads/profile-pics";
+const  uploadDir = "uploads/profile-pics";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -24,7 +25,7 @@ const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname);
 
   if (ext !== ".jpg" && ext !== ".png" && ext !== ".jpeg") {
-    return cb(new Error("Only Images are allowed"));
+    return cb(new customError("Only Images are allowed",400));
   }
 
   cb(null, true);
