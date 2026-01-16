@@ -50,3 +50,8 @@ h1{
   color:var(--body-color);
 }
 
+.error{
+  color:red;
+  font-size:14px;
+}
+

@@ -9,18 +9,25 @@ import Select from "react-select";
 import Pagination from "../Pagination/Pagination.jsx";
 
 const TodoList = () => {
-  const { allTodos, getPageTodos, deleteTodo, updateTodo, error } =
-    useTodoStore();
+  const {
+    allTodos,
+    getPageTodos,
+    deleteTodo,
+    updateTodo,
+    error,
+    fieldErrors,
+    clearErrors,
+  } = useTodoStore();
   const [activeTodo, setActiveTodo] = useState("all");
   const [isModal, setIsModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+   const [currentPage, setCurrentPage] = useState(1);
   const [formData, setFormData] = useState({
     todoName: "",
     description: "",
     status: null,
   });
-
- 
 
   const button = [
     { value: "all", name: "All" },
@@ -30,21 +37,44 @@ const TodoList = () => {
   ];
 
   useEffect(() => {
-    getPageTodos(1, 5);
-  }, []);
+    getPageTodos(1, 5, activeTodo);
+  }, [activeTodo]);
 
-  const filterTodos = () => {
-    if (activeTodo === "all") {
-      return allTodos;
-    }
-    const filterData = allTodos.filter((todo) => todo.status === activeTodo);
-    return filterData;
+  const shouldDisableButton =
+    isSubmitted && Object.keys(fieldErrors || {}).length > 0;
+
+  const handleCloseModal = () => {
+    setIsModal(false);
+    setIsSubmitted(false);
+    clearErrors();
   };
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (fieldErrors?.[name]) {
+      clearErrors();
+    }
+  };
+
+  // const filterTodos = () => {
+  //   if (activeTodo === "all") {
+  //     return allTodos;
+  //   }
+  //   const filterData = allTodos.filter((todo) => todo.status === activeTodo);
+  //   return filterData;
+  // };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    updateTodo(editingId, formData);
-    setIsModal(false);
+
+    setIsSubmitted(true);
+    const result = await updateTodo(editingId, formData);
+
+    if (result?.success) {
+      handleCloseModal();
+    }
   };
 
   const options = [
@@ -53,11 +83,9 @@ const TodoList = () => {
     { value: "canceled", label: "Canceled" },
   ];
 
- 
-
   return (
     <>
-      <AddTasks />
+      <AddTasks currentPage={currentPage} activeTodo={activeTodo}/>
 
       <div
         className=" w-full mt-10 text-black"
@@ -83,14 +111,11 @@ const TodoList = () => {
             ))}
           </div>
           <div className="w-full space-y-4 mx-auto max-w-2xl min-h-96">
-            
-            { error ? (
-              
+            {error ? (
               <p className="text-center text-gray-500 mt-10">{error}</p>
             ) : allTodos && allTodos.length > 0 ? (
               <>
-           
-                {filterTodos().map((todo) => (
+                {allTodos.map((todo) => (
                   <div
                     key={todo._id}
                     className=" flex flex-row items-center justify-between bg-white rounded-lg p-4 shadow-md  transition"
@@ -121,13 +146,13 @@ const TodoList = () => {
                       <button className="p-2  rounded-lg transition cursor-pointer text-black hover:text-gray-500">
                         <Trash2Icon
                           className="w-5 h-5"
-                          onClick={() => deleteTodo(todo._id)}
+                          onClick={() => deleteTodo(todo._id,currentPage,activeTodo)}
                         />
                       </button>
                     </div>
                   </div>
                 ))}
-                <Pagination />
+                <Pagination activeTodo={activeTodo} />
               </>
             ) : (
               <EmptyTodoList />
@@ -139,7 +164,7 @@ const TodoList = () => {
       {isModal && (
         <div
           className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50"
-          onClick={() => setIsModal(false)}
+          onClick={handleCloseModal}
         >
           <div
             className="form rounded-lg p-8 w-full max-w-sm sm:max-w-md md:max-w-2xl  mx-auto shadow-lg"
@@ -148,7 +173,7 @@ const TodoList = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold">Update Task</h2>
               <button
-                onClick={() => setIsModal(false)}
+                onClick={handleCloseModal}
                 className="cross-btn cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -159,15 +184,13 @@ const TodoList = () => {
                 <label className=" font-medium mb-2">Todo</label>
                 <input
                   type="text"
-                  name="todo"
+                  name="todoName"
                   placeholder="Enter todo name here..."
                   value={formData.todoName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, todoName: e.target.value })
-                  }
+                  onChange={handleChange}
                   className="px-4 py-2 rounded-lg border border-gray-300 outline-none text-gray-400"
-                  required
                 />
+                <span className="error">{fieldErrors.todoName}</span>
               </div>
 
               <div className="flex flex-col">
@@ -178,12 +201,11 @@ const TodoList = () => {
                   name="description"
                   placeholder="Enter todo detail"
                   value={formData.description}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
-                  }
+                  onChange={handleChange}
                   className="px-4 py-2 rounded-lg border border-gray-300 outline-none text-gray-400 resize-none"
                   rows="3"
                 />
+                <span className="error">{fieldErrors.description}</span>
               </div>
 
               <div className="flex flex-col">
@@ -197,20 +219,27 @@ const TodoList = () => {
                       ? options.find((opt) => opt.value === formData.status)
                       : null
                   }
-                  onChange={(selectedOptions) =>
-                    setFormData({ ...formData, status: selectedOptions.value })
-                  }
+                  onChange={(selectedOptions) => {
+                    setFormData({ ...formData, status: selectedOptions.value });
+                    if (fieldErrors?.status) {
+                      clearErrors();
+                    }
+                  }}
                 />
               </div>
               <div className="flex flex-col items-center justify-between sm:flex-row gap-4 mt-8">
                 <button
                   type="button"
-                  onClick={() => setIsModal(false)}
+                  onClick={handleCloseModal}
                   className=" font-semibold  cursor-pointer rounded-sm px-3 py-2"
                 >
                   Cancel
                 </button>
-                <button type="submit" className="btn px-6 w-full sm:w-auto">
+                <button
+                  type="submit"
+                  className="btn px-6 w-full sm:w-auto"
+                  disabled={shouldDisableButton}
+                >
                   Update
                 </button>
               </div>

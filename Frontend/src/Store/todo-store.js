@@ -10,7 +10,7 @@ export const useTodoStore = create((set, get) => ({
   totalTodos: 0,
   inputValue: "",
   totalSearchCount: 0,
-  error: null,
+  fieldErrors: {},
 
   setTab: (tab) => {
     set({ selectedTab: tab });
@@ -29,54 +29,83 @@ export const useTodoStore = create((set, get) => ({
     }
   },
 
-  addTodo: async (data) => {
+  addTodo: async (data, currentPage = 1, activeTodo = "all") => {
     try {
+      set({ fieldErrors: {} });
+
       const response = await axiosInstance.post("/todo/addTodo", data);
-      set({ allTodos: response.data });
-      await get().getAllTodos();
+
+      const { inputValue } = get();
+
+      if (inputValue && inputValue.trim()) {
+        await get().searchTodos(inputValue, 1, 5);
+      } else {
+        await get().getPageTodos(currentPage, 5, activeTodo || "all");
+      }
+
+      set({ fieldErrors: {} });
       toast.success(response.data.message);
+      return { success: true };
     } catch (error) {
-      console.log("error in adding todos", error);
-      toast.error(error.response.message || "Erro in adding Todo");
+      set({ fieldErrors: error.response?.data?.errors || {} });
+      toast.error(error.response?.data?.message || "Error in adding Todo");
+      return { success: false };
     }
   },
 
-  deleteTodo: async (id) => {
+  deleteTodo: async (id, currentPage = 1, activeTodo = "all") => {
     try {
       const response = await axiosInstance.delete(`/todo/deleteTodo/${id}`);
-      await get().getAllTodos();
+
+      const { inputValue } = get();
+
+      if (inputValue && inputValue.trim()) {
+        await get().searchTodos(inputValue, currentPage, 5);
+      } else {
+        await get().getPageTodos(currentPage, 5, activeTodo || "all");
+      }
+
       toast.success(response.data.message);
     } catch (error) {
-      console.log("Erro in deleting Todo", error);
-      toast.error(error.response.message || "Failed to delte Todo");
+      console.log("Error in deleting Todo", error);
+      toast.error(error.response?.data?.message || "Failed to delete Todo");
     }
   },
 
-  updateTodo: async (id, data) => {
+  updateTodo: async (id, data, currentPage = 1, activeTodo = "all") => {
     try {
-      set({ isUploading: true });
+      set({ isUploading: true, fieldErrors: {} });
+
       const response = await axiosInstance.put(`/todo/updateTodo/${id}`, data);
+
+      await get().getPageTodos(currentPage, 5, activeTodo || "all");
+
+      set({ fieldErrors: {} });
       toast.success(response.data.message);
-      await get().getAllTodos();
+      return { success: true };
     } catch (error) {
-      console.log("Error in updating Todos ", error);
-      toast.error(error.response.message);
+      set({ fieldErrors: error.response?.data?.errors || {} });
+      toast.error(error.response?.data?.message || "Error in updating Todo");
+      return { success: false };
     } finally {
       set({ isUploading: false });
     }
   },
 
-  getPageTodos: async (page, limit) => {
+  getPageTodos: async (page, limit, status) => {
     try {
       set({ isTodoLoading: true });
-      const response = await axiosInstance.get(
-        `/todo/allTodos?page=${page}&limit=${limit}`
-      );
+
+      let url = `/todo/allTodos?page=${page}&limit=${limit}`;
+      if (status && status !== "all") {
+        url += `&status=${status}`;
+      }
+      const response = await axiosInstance.get(url);
 
       set({ allTodos: response.data.todos });
       set({ totalTodos: response.data.total });
-    } catch {
-      console.log("error in fetching paginated todos");
+    } catch (error) {
+      console.log("error in fetching paginated todos", error);
     } finally {
       set({ isTodoLoading: false });
     }
@@ -109,5 +138,9 @@ export const useTodoStore = create((set, get) => ({
       console.log("Error in searching todos", error);
       set({ isTodoLoading: false });
     }
+  },
+
+  clearErrors: () => {
+    set({ fieldErrors: {} });
   },
 }));

@@ -2,19 +2,25 @@ import React from "react";
 import { useAuthStore } from "../Store/auth-store";
 import { useNavigate } from "react-router-dom";
 
-
 const ResetPasswrodPage = () => {
   const [formData, setFormData] = React.useState({ newPassword: "" });
-  const {resetPassword} = useAuthStore();
+  const { resetPassword, fieldErrors, clearErrors } = useAuthStore();
 
   const navigate = useNavigate();
-  
-  const handleSubmit = async(e) => {
+
+  const handleChange = (e)=>{
+    const {name,value}= e.target;
+
+    setFormData({...formData,[name]:value});
+    if(fieldErrors?.[name]){
+      clearErrors()
+    }
+  }
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     const result = await resetPassword(formData);
-
-    if(result.success){
+    if (result.success) {
       navigate("/login");
     }
   };
@@ -33,13 +39,13 @@ const ResetPasswrodPage = () => {
             <label className="text-gray-700 text-sm">New Password</label>
             <input
               type="password"
+              name="newPassword"
               value={formData.newPassword}
-              onChange={(e) =>
-                setFormData({ ...formData, newPassword: e.target.value })
-              }
+              onChange={handleChange}
               placeholder="Enter new password"
               className="w-full px-3 py-2 border rounded-lg focus:outline-none text-sm"
             />
+            <span className="error">{fieldErrors.newPassword}</span>
           </div>
           <button className="btn mt-2">Reset Password</button>
         </form>
