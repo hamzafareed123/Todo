@@ -2,14 +2,12 @@ import { axiosInstance } from "../lib/axios";
 import { create } from "zustand";
 import toast from "react-hot-toast";
 
-
-
-
 export const useAuthStore = create((set, get) => ({
   authUser: null,
   isCheckingAuth: false,
   isSignUp: false,
   isLogin: false,
+  fieldErrors: {},
 
   checkAuth: async () => {
     try {
@@ -30,8 +28,9 @@ export const useAuthStore = create((set, get) => ({
       const response = await axiosInstance.post("/auth/signup", data);
       set({ authUser: response.data });
       toast.success(response.data.message);
+      console.log("response in signup is ", response.data.message);
     } catch (error) {
-      console.log("Signup error details:", error.response?.data);
+      set({ fieldErrors: error.response?.data.errors || {} });
       toast.error(error.response.data.message || "SignUp Failed");
     } finally {
       set({ isSignUp: false });
@@ -45,6 +44,7 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: response.data });
       toast.success(response.data.message);
     } catch (error) {
+      set({ fieldErrors: error.response?.data.errors || {} });
       toast.error(error.response.data.message || "Login Failed");
     } finally {
       set({ isLogin: false });
@@ -73,7 +73,8 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: response.data });
       toast.success("Profile Updated Successfully");
     } catch (error) {
-      console.log("Error in Updating Profile", error);
+      set({ fieldErrors: error.response?.data.errors || {} });
+
       toast.error(error.response.data.message || "Failed to update Profile");
     }
   },
@@ -83,7 +84,7 @@ export const useAuthStore = create((set, get) => ({
       const response = await axiosInstance.post("/auth/forgot-password", data);
       toast.success(response.data.message);
     } catch (error) {
-      console.log("Error in Forgot password", error);
+      set({ fieldErrors: error.response?.data.errors || {} });
       toast.error(error.response?.message || "Failed to send reset email");
     }
   },
@@ -93,12 +94,19 @@ export const useAuthStore = create((set, get) => ({
     const token = params.get("token");
     const id = params.get("id");
     try {
-      const response = await axiosInstance.post(`/auth/reset-password/${id}/${token}`,  data );
+      const response = await axiosInstance.post(
+        `/auth/reset-password/${id}/${token}`,
+        data
+      );
       toast.success(response.data.message);
-      return {success:true};
+      return { success: true };
     } catch (error) {
-      console.log("Error in Reset Passwod");
+      set({ fieldErrors: error.response?.data.errors || {} });
       toast.error(error.response.data.message || "Failed to reset password");
     }
   },
+
+  clearErrors: ()=>{
+    set({fieldErrors:{}})
+  }
 }));

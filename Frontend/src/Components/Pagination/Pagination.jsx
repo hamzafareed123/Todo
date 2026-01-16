@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useTodoStore } from "../../Store/todo-store";
 
-const Pagination = () => {
+const Pagination = ({activeTodo}) => {
   const {
     totalTodos,
     getPageTodos,
@@ -10,27 +10,29 @@ const Pagination = () => {
     searchTodos,
   } = useTodoStore();
   const [currentPage, setCurrentPage] = useState(1);
-
+  
   const isSearching = inputValue && inputValue.trim();
 
   const total = isSearching ? totalSearchCount : totalTodos;
 
   const totalPages = Math.ceil(total / 5);
 
-
+   console.log("total:", total);
+  console.log("totalPages:", totalPages);
+  console.log("totalTodos:", totalTodos);
+  console.log("allTodos length:", useTodoStore.getState().allTodos?.length);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [isSearching]);
-
-
+  }, [isSearching,activeTodo]);
 
   const handlePageClick = (page) => {
     setCurrentPage(page);
+  
     if (isSearching) {
       searchTodos(inputValue, page, 5);
     } else {
-      getPageTodos(page, 5);
+      getPageTodos(page, 5,activeTodo);
     }
   };
 

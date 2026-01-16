@@ -8,7 +8,17 @@ import GoogleLoginButton from "../Components/GoogleLoginButton/GoogleLoginButton
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const { Login, isLogin } = useAuthStore();
+  const { Login, isLogin, fieldErrors, clearErrors } = useAuthStore();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData({ ...formData, [name]: value });
+
+    if(fieldErrors?.[name]){
+      clearErrors();
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -36,13 +46,13 @@ const LoginPage = () => {
               </label>
               <input
                 type="email"
+                name="email"
                 placeholder="Enter your email"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={handleChange}
                 className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition"
               />
+              <span className="error">{fieldErrors.email}</span>
             </div>
 
             <div className="space-y-2">
@@ -51,13 +61,13 @@ const LoginPage = () => {
               </label>
               <input
                 type="password"
+                name="password"
                 placeholder="Enter your password"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 text-black focus:ring-blue-500 focus:border-transparent transition"
               />
+              <span className="error">{fieldErrors.password}</span>
             </div>
 
             <button

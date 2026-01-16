@@ -1,20 +1,34 @@
 import React, { useRef, useState } from "react";
 import { useAuthStore } from "../../Store/auth-store";
 import avatarImage from "/avatar.png";
-import { Loader2Icon,LogOutIcon } from "lucide-react";
+import { Loader2Icon, LogOutIcon } from "lucide-react";
 
 const Setting = () => {
-  const { authUser, isUploading, updateProfile,LogOut } = useAuthStore();
-  const [isLogout,setIsLogout]= useState(false);
+  const {
+    authUser,
+    isUploading,
+    updateProfile,
+    LogOut,
+    fieldErrors,
+    clearErrors,
+  } = useAuthStore();
+  const [isLogout, setIsLogout] = useState(false);
   const [formData, setFormData] = useState({
     profilePic: authUser?.profilePic || "",
     fullName: authUser?.fullName || "",
     email: authUser?.email || "",
   });
 
-  console.log("authUser is ", authUser);
-
   const fileRef = useRef();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setFormData({ ...formData, [name]: value });
+    if (fieldErrors?.[name]) {
+      clearErrors();
+    }
+  };
 
   const handleImage = (e) => {
     const file = e.target.files[0];
@@ -40,25 +54,25 @@ const Setting = () => {
     updateProfile(sendData);
   };
 
-  const handleLogout  = ()=>{
+  const handleLogout = () => {
     LogOut();
-
-  }
+  };
 
   return (
-<div className="setting bg-white pt-6 px-4 mt-10 lg:mt-0 sm:mt-10 md:mt-0">
+    <div className="setting bg-white pt-6 px-4 mt-10 lg:mt-0 sm:mt-10 md:mt-0">
       <div className="max-w-3xl mx-auto">
-       
+        <div className="flex items-center justify-between mb-8 ">
+          <h1 className="text-3xl font-bold text-black ">Settings</h1>
 
-       <div className="flex items-center justify-between mb-8 ">
-         <h1 className="text-3xl font-bold text-black ">Settings</h1>
-       
-         <button className="btn" onClick={(e)=>setIsLogout(true)}>  <LogOutIcon className="w-6 h-6  "/>Logout</button>
-       </div>
+          <button className="btn" onClick={(e) => setIsLogout(true)}>
+            {" "}
+            <LogOutIcon className="w-6 h-6  " />
+            Logout
+          </button>
+        </div>
 
         <div className="border border-gray-300 rounded-lg p-8">
           <form onSubmit={handleSubmit}>
-         
             <div className="flex flex-col items-center justify-center mb-8">
               <label className="block text-sm font-semibold  mb-4">
                 Profile Picture
@@ -101,36 +115,31 @@ const Setting = () => {
               />
             </div>
 
-         
             <div className="mb-6">
               <label className="block text-sm font-semibold  mb-2">
                 Full Name
               </label>
               <input
                 type="text"
+                name="fullName"
                 value={formData.fullName}
-                onChange={(e) =>
-                  setFormData({ ...formData, fullName: e.target.value })
-                }
+                onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 "
               />
+              <span className="error">{fieldErrors.fullName}</span>
             </div>
 
-            
             <div className="mb-8">
-              <label className="block text-sm font-semibold  mb-2">
-                Email
-              </label>
+              <label className="block text-sm font-semibold  mb-2">Email</label>
               <input
                 type="email"
+                name="email"
                 value={formData.email || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 "
               />
+              <span className="error">{fieldErrors.email}</span>
             </div>
-
 
             <div className="flex gap-3">
               <button
@@ -140,7 +149,6 @@ const Setting = () => {
               >
                 {isUploading ? "Updating..." : "Update Profile"}
               </button>
-         
             </div>
           </form>
         </div>

@@ -5,13 +5,21 @@ import { useAuthStore } from "../Store/auth-store";
 import GoogleLoginButton from "../Components/GoogleLoginButton/GoogleLoginButton";
 
 const SignUpPage = () => {
-  const { isSignUp, Signup } = useAuthStore();
+  const { isSignUp, Signup, fieldErrors, clearErrors } = useAuthStore();
 
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
   });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    if (fieldErrors?.[name]) {
+      clearErrors();
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -39,13 +47,13 @@ const SignUpPage = () => {
               </label>
               <input
                 type="text"
+                name="fullName"
                 placeholder="Enter your full name"
                 value={formData.fullName}
-                onChange={(e) =>
-                  setFormData({ ...formData, fullName: e.target.value })
-                }
+                onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none text-black focus:ring-1 focus:ring-blue-500 focus:border-transparent transition"
               />
+              <span className="error">{fieldErrors.fullName}</span>
             </div>
 
             <div className="space-y-2">
@@ -54,13 +62,13 @@ const SignUpPage = () => {
               </label>
               <input
                 type="email"
+                name="email"
                 placeholder="Enter your email"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={handleChange}
                 className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-transparent transition"
               />
+              <span className="error">{fieldErrors.email}</span>
             </div>
 
             <div className="space-y-2">
@@ -69,13 +77,13 @@ const SignUpPage = () => {
               </label>
               <input
                 type="password"
+                name="password"
                 placeholder="Enter your password"
                 value={formData.password}
-                onChange={(e) =>
-                  setFormData({ ...formData, password: e.target.value })
-                }
+                onChange={handleChange}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 text-black focus:ring-blue-500 focus:border-transparent transition"
               />
+              <span className="error">{fieldErrors.password}</span>
             </div>
 
             <button

@@ -3,21 +3,8 @@ import { customError } from "../lib/customError.js";
 
 export const addTodo = async (req, res, next) => {
   try {
-    const { todoName, description, status } = req.body;
+    const { todoName, description, status } = req.validatedData;
     const userId = req.user.id;
-
-    if (!todoName || todoName.trim() === "") {
-      throw new customError("todo name is required", 400);
-    }
-
-    const validateStatus = ["pending", "completed", "canceled"];
-
-    if (!status && !validateStatus.includes(status)) {
-      throw new customError(
-        "Status must be 'pending', 'completed', or 'canceled'",
-        400
-      );
-    }
 
     const newTodo = await Todo.create({
       userId: userId,
@@ -120,12 +107,19 @@ export const allTods = async (req, res, next) => {
     const userId = req.user.id;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
+    const status = req.query.status;
 
+    let filter = {userId};
+
+    if(status && status!=='all'){
+      filter.status=status;
+    }
     const startIndex = (page - 1) * limit;
 
-    const todos = await Todo.find({ userId }).skip(startIndex).limit(limit);
+    const todos = await Todo.find( filter).skip(startIndex).limit(limit);
 
-    const total = await Todo.countDocuments({ userId });
+    const total = await Todo.countDocuments(filter);
+    
     res.status(200).json({ page, limit, total, todos });
   } catch (error) {
     next(error);
@@ -165,3 +159,8 @@ export const searchTodos = async (req, res, next) => {
     next(error);
   }
 };
+
+
+export const sendTodos = async (req,res,next)=>{
+  
+}
