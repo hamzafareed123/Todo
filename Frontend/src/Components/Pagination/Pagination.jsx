@@ -17,10 +17,6 @@ const Pagination = ({activeTodo}) => {
 
   const totalPages = Math.ceil(total / 5);
 
-   console.log("total:", total);
-  console.log("totalPages:", totalPages);
-  console.log("totalTodos:", totalTodos);
-  console.log("allTodos length:", useTodoStore.getState().allTodos?.length);
 
   useEffect(() => {
     setCurrentPage(1);

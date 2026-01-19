@@ -231,10 +231,20 @@ export const resetPassword = async (req, res, next) => {
 
 export const getAllUsers = async (req, res, next) => {
   try {
-    const allUsers = await User.find().select("-password");
-    if (!allUsers) {
+    const userId = req.user._id;
+    const Users = await User.find({ _id: { $ne: userId } }).select(
+      "-password"
+    );
+
+    if (!Users) {
       throw new customError("All User not Found", 404);
     }
+
+    const allUsers= Users.map((user)=>{
+      const userObject = user.toObject();
+      userObject.profilePic=generateFileUrl(userObject.profilePic,req);
+      return userObject;
+    })
 
     res.status(200).json(allUsers);
   } catch (error) {

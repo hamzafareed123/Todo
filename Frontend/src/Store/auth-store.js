@@ -8,6 +8,7 @@ export const useAuthStore = create((set, get) => ({
   isSignUp: false,
   isLogin: false,
   fieldErrors: {},
+  allUsers:[],
 
   checkAuth: async () => {
     try {
@@ -108,5 +109,15 @@ export const useAuthStore = create((set, get) => ({
 
   clearErrors: ()=>{
     set({fieldErrors:{}})
+  },
+
+  getAllUsers:async()=>{
+    try {
+      const response = await axiosInstance.get("/auth/getAllUsers");
+      set({allUsers:response?.data});
+    } catch (error) {
+      console.log("error in fetching all users", error);
+      
+    }
   }
 }));

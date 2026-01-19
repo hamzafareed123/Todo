@@ -5,6 +5,7 @@ import TodoList from "../Components/TodoList/TodoList";
 import EmptyTodoList from "../Components/EmptyTodoList/EmptyTodoList";
 import { useTodoStore } from "../Store/todo-store";
 import Setting from "../Components/Setting.jsx/Setting";
+import SharedTodos from "./SharedTodos";
 
 const TodoContainer = () => {
 
@@ -23,6 +24,7 @@ const TodoContainer = () => {
         
         {selectedTab === "Tasks" && <TodoList />}
         {selectedTab === "Setting" && <Setting />}
+        {selectedTab === "Collaborations" && <SharedTodos/>}
       </main>
     </div>
   );
