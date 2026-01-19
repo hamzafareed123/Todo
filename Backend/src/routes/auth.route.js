@@ -47,4 +47,5 @@ router.post(
 
 router.get("/getAllUsers",protectedRoute,getAllUsers);
 
+
 export default router;

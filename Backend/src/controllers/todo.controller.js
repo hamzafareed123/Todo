@@ -1,5 +1,7 @@
 import Todo from "../models/Todo.js";
 import { customError } from "../lib/customError.js";
+import User from "../models/User.js";
+import { generateFileUrl } from "../lib/urlGenerator.js";
 
 export const addTodo = async (req, res, next) => {
   try {
@@ -109,17 +111,17 @@ export const allTods = async (req, res, next) => {
     const limit = parseInt(req.query.limit) || 5;
     const status = req.query.status;
 
-    let filter = {userId};
+    let filter = { userId };
 
-    if(status && status!=='all'){
-      filter.status=status;
+    if (status && status !== "all") {
+      filter.status = status;
     }
     const startIndex = (page - 1) * limit;
 
-    const todos = await Todo.find( filter).skip(startIndex).limit(limit);
+    const todos = await Todo.find(filter).skip(startIndex).limit(limit);
 
     const total = await Todo.countDocuments(filter);
-    
+
     res.status(200).json({ page, limit, total, todos });
   } catch (error) {
     next(error);
@@ -160,7 +162,102 @@ export const searchTodos = async (req, res, next) => {
   }
 };
 
+export const shareTodo = async (req, res, next) => {
+  try {
+    const { permission = "edit", emails } = req.body;
+    const senderId = req.user._id;
+    const { todoId } = req.params;
 
-export const sendTodos = async (req,res,next)=>{
-  
-}
+
+
+    if (!emails) {
+      throw new customError("Email is required", 400);
+    }
+
+    const todo = await Todo.findById(todoId);
+
+    // check the user who created the id is same the user who send it
+    if (todo.userId.toString() !== senderId.toString()) {
+      throw new customError("Can't send to Your-self", 404);
+    }
+
+    const receivers = await User.find({ email: { $in: emails } });
+
+    if (receivers.length === 0) {
+      throw new customError("No User found", 404);
+    }
+
+    let addedCount = 0;
+
+    for (const reciver of receivers) {
+      //skip for sending to yourself
+      if (reciver._id.toString() === senderId.toString()) continue;
+
+      //skip if already share
+
+      const alreadyShared = todo.sharedWith.some(
+        (share) => share.userId.toString() === reciver._id.toString(),
+      );
+
+      if (alreadyShared) continue;
+
+      todo.sharedWith.push({
+        userId: reciver._id,
+        email: reciver.email,
+        permission,
+      });
+
+      addedCount++;
+    }
+
+    if (addedCount > 0) {
+      todo.isShared = true;
+
+      await todo.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Todo shared with ${addedCount} user(s)`,
+      data: {
+        todoId: todo._id,
+        sharedCount: addedCount,
+        skippedCount: receivers.length - addedCount,
+        details: `${addedCount} new, ${receivers.length - addedCount} already shared`,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSharedTodos = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    let sharedTodos = await Todo.find({ "sharedWith.userId": userId })
+      .populate("userId", "fullName email profilePic");
+
+    const filterSharedTodos = sharedTodos.map((todo) => {
+      const todoObj = todo.toObject();
+      
+      return {
+        ...todoObj,
+        userId:{
+          ...todoObj.userId,
+          profilePic:generateFileUrl(todoObj.userId.profilePic,req)
+        },
+        sharedWith: todoObj.sharedWith.filter(
+          (share) => share.userId.toString() === userId.toString()
+        )
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      data: filterSharedTodos,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

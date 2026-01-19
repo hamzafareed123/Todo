@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Menu, X, ListTodo, Settings, LogOut } from "lucide-react";
+import {
+  Menu,
+  X,
+  ListTodo,
+  Settings,
+  LogOut,
+  HandshakeIcon,
+} from "lucide-react";
 import avatarImage from "/avatar.png";
 import { Link } from "react-router-dom";
 import { useAuthStore } from "../../Store/auth-store";
@@ -92,6 +99,20 @@ const Sidebar = () => {
           >
             <Settings className="w-5 h-5" />
             {!isCollapsed && <span className="font-medium">Settings</span>}
+          </Link>
+
+          <Link
+             onClick={() => {
+              setIsOpen(false);
+              setTab("Collaborations");
+            }}
+            className={`flex items-center gap-3 rounded-lg  hover:bg-opacity-20 transition duration-200  active:bg-opacity-30 ${
+              isCollapsed ? "w-10 h-10 justify-center" : "px-4 py-3 w-full"
+            }`}
+            title={isCollapsed ? "Collaborations" : ""}
+          >
+            <HandshakeIcon className="w-5 h-5" />
+            Collaborations
           </Link>
         </nav>
       </div>

@@ -12,6 +12,7 @@ export const createTodoSchema = Joi.object({
   }),
   status: Joi.string()
     .valid("pending", "completed", "canceled")
+    .allow("")
     .default("pending"),
 });
 

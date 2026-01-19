@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { useTodoStore } from "../../Store/todo-store";
-import { Trash2Icon, Edit2Icon } from "lucide-react";
+import { Trash2Icon, Edit2Icon, MoreVertical, Share2Icon } from "lucide-react";
 import EmptyTodoList from "../EmptyTodoList/EmptyTodoList";
 import AddTasks from "../AddTasks/AddTasks";
 import { X } from "lucide-react";
 import Select from "react-select";
 import Pagination from "../Pagination/Pagination.jsx";
+import ShareModal from "../ShareModal/ShareModal.jsx";
 
 const TodoList = () => {
   const {
@@ -22,7 +23,11 @@ const TodoList = () => {
   const [isModal, setIsModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
-   const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [openMenuId, setOpenMenuId] = useState(null);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [selectedTodoForShare, setSelectedTodoForShare] = useState(null);
+
   const [formData, setFormData] = useState({
     todoName: "",
     description: "",
@@ -58,23 +63,42 @@ const TodoList = () => {
     }
   };
 
-  // const filterTodos = () => {
-  //   if (activeTodo === "all") {
-  //     return allTodos;
-  //   }
-  //   const filterData = allTodos.filter((todo) => todo.status === activeTodo);
-  //   return filterData;
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     setIsSubmitted(true);
-    const result = await updateTodo(editingId, formData);
+    const result = await updateTodo(
+      editingId,
+      formData,
+      currentPage,
+      activeTodo
+    );
 
     if (result?.success) {
       handleCloseModal();
     }
+  };
+
+  const handleEdit = (todo) => {
+    setIsModal(true);
+    setEditingId(todo._id);
+    setFormData({
+      todoName: todo.todoName,
+      description: todo.description,
+      status: todo.status,
+    });
+    setOpenMenuId(null);
+  };
+
+  const handleDelete = (todoId) => {
+    deleteTodo(todoId, currentPage, activeTodo);
+    setOpenMenuId(null);
+  };
+
+  const handleShare = (todo) => {
+    console.log("Share todo:", todo);
+    setShareModalOpen(true);
+    setSelectedTodoForShare(todo);
+    setOpenMenuId(null);
   };
 
   const options = [
@@ -85,10 +109,10 @@ const TodoList = () => {
 
   return (
     <>
-      <AddTasks currentPage={currentPage} activeTodo={activeTodo}/>
+      <AddTasks currentPage={currentPage} activeTodo={activeTodo} />
 
       <div
-        className=" w-full mt-10 text-black"
+        className="w-full mt-10 text-black"
         style={{
           backgroundColor: "var(--body_background)",
           color: "var(--body_color)",
@@ -110,6 +134,7 @@ const TodoList = () => {
               </button>
             ))}
           </div>
+
           <div className="w-full space-y-4 mx-auto max-w-2xl min-h-96">
             {error ? (
               <p className="text-center text-gray-500 mt-10">{error}</p>
@@ -118,7 +143,7 @@ const TodoList = () => {
                 {allTodos.map((todo) => (
                   <div
                     key={todo._id}
-                    className=" flex flex-row items-center justify-between bg-white rounded-lg p-4 shadow-md  transition"
+                    className="flex flex-row items-center justify-between bg-white rounded-lg p-4 shadow-md transition"
                   >
                     <div className="flex flex-col items-start justify-start gap-1 flex-1">
                       <h5 className="text-lg font-semibold text-black">
@@ -128,27 +153,56 @@ const TodoList = () => {
                         {todo.description}
                       </p>
                     </div>
-                    <div className="flex flex-row items-center justify-center gap-4 ml-4">
-                      <button className="p-2  rounded-lg transition cursor-pointer text-black hover:text-gray-500">
-                        <Edit2Icon
-                          className="w-5 h-5"
-                          onClick={() => {
-                            setIsModal(true);
-                            setEditingId(todo._id);
-                            setFormData({
-                              todoName: todo.todoName,
-                              description: todo.description,
-                              status: todo.status,
-                            });
-                          }}
-                        />
+
+                    {/* Three-dot menu */}
+                    <div className="relative ml-4">
+                      <button
+                        onClick={() =>
+                          setOpenMenuId(
+                            openMenuId === todo._id ? null : todo._id
+                          )
+                        }
+                        className="p-2 rounded-lg transition cursor-pointer text-black hover:text-gray-500 hover:bg-gray-100"
+                      >
+                        <MoreVertical className="w-5 h-5" />
                       </button>
-                      <button className="p-2  rounded-lg transition cursor-pointer text-black hover:text-gray-500">
-                        <Trash2Icon
-                          className="w-5 h-5"
-                          onClick={() => deleteTodo(todo._id,currentPage,activeTodo)}
-                        />
-                      </button>
+
+                      {openMenuId === todo._id && (
+                        <>
+                          <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setOpenMenuId(null)}
+                          />
+                          <div
+                            onClick={() => setOpenMenuId(null)}
+                            className="absolute right-0 mt-2 w-48  bg-white border border-gray-300 rounded-lg shadow-lg z-50"
+                          >
+                            <button
+                              onClick={() => handleEdit(todo)}
+                              className="w-full flex items-center cursor-pointer gap-2 px-4 py-2 hover:bg-gray-100 transition text-left"
+                            >
+                              <Edit2Icon className="w-4 h-4" />
+                              <span>Edit</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleShare(todo)}
+                              className="w-full flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 transition text-left border-t border-gray-200"
+                            >
+                              <Share2Icon className="w-4 h-4" />
+                              <span>Share</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleDelete(todo._id)}
+                              className="w-full flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-red-100 transition text-left text-red-600 border-t border-gray-200"
+                            >
+                              <Trash2Icon className="w-4 h-4" />
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -161,13 +215,23 @@ const TodoList = () => {
         </div>
       </div>
 
+      {shareModalOpen && (
+        <ShareModal
+          todo={selectedTodoForShare}
+          onClose={() => {
+            setShareModalOpen(false);
+            setSelectedTodoForShare(null);
+          }}
+        />
+      )}
+
       {isModal && (
         <div
           className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50"
           onClick={handleCloseModal}
         >
           <div
-            className="form rounded-lg p-8 w-full max-w-sm sm:max-w-md md:max-w-2xl  mx-auto shadow-lg"
+            className="form rounded-lg p-8 w-full max-w-sm sm:max-w-md md:max-w-2xl mx-auto shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-6">
@@ -179,22 +243,29 @@ const TodoList = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex flex-col">
-                <label className=" font-medium mb-2">Todo</label>
+                <label className="font-medium mb-2">Todo</label>
                 <input
                   type="text"
                   name="todoName"
                   placeholder="Enter todo name here..."
                   value={formData.todoName}
                   onChange={handleChange}
-                  className="px-4 py-2 rounded-lg border border-gray-300 outline-none text-gray-400"
+                  className={`px-4 py-2 rounded-lg border outline-none text-gray-400 ${
+                    fieldErrors?.todoName ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
-                <span className="error">{fieldErrors.todoName}</span>
+                {fieldErrors?.todoName && (
+                  <span className="text-red-500 text-sm">
+                    {fieldErrors.todoName}
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-col">
-                <label className=" font-medium mb-2">
+                <label className="font-medium mb-2">
                   Description (Optional)
                 </label>
                 <textarea
@@ -202,15 +273,22 @@ const TodoList = () => {
                   placeholder="Enter todo detail"
                   value={formData.description}
                   onChange={handleChange}
-                  className="px-4 py-2 rounded-lg border border-gray-300 outline-none text-gray-400 resize-none"
+                  className={`px-4 py-2 rounded-lg border outline-none text-gray-400 resize-none ${
+                    fieldErrors?.description
+                      ? "border-red-500"
+                      : "border-gray-300"
+                  }`}
                   rows="3"
                 />
-                <span className="error">{fieldErrors.description}</span>
+                {fieldErrors?.description && (
+                  <span className="text-red-500 text-sm">
+                    {fieldErrors.description}
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-col">
-                <label className=" font-medium mb-2">Status</label>
-
+                <label className="font-medium mb-2">Status</label>
                 <Select
                   className="text-black cursor-pointer"
                   options={options}
@@ -227,11 +305,12 @@ const TodoList = () => {
                   }}
                 />
               </div>
+
               <div className="flex flex-col items-center justify-between sm:flex-row gap-4 mt-8">
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className=" font-semibold  cursor-pointer rounded-sm px-3 py-2"
+                  className="font-semibold cursor-pointer rounded-sm px-3 py-2"
                 >
                   Cancel
                 </button>

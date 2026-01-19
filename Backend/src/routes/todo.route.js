@@ -8,7 +8,9 @@ import {
   getTodoById,
   allTods,
   searchTodos,
-  sendTodos,
+  shareTodo,
+  getSharedTodos,
+  editSharedTodo,
 } from "../controllers/todo.controller.js";
 import { validate } from "../middleware/validationMiddleware.js";
 import {
@@ -25,11 +27,13 @@ router.put(
   "/updateTodo/:id",
   protectedRoute,
   validate(updateTodoSchema),
-  updateTodo
+  updateTodo,
 );
 router.get("/getTodo/:id", protectedRoute, getTodoById);
 router.get("/allTodos", protectedRoute, allTods);
 router.get("/searchTodos", protectedRoute, searchTodos);
-router.post("/sendTodos", protectedRoute, sendTodos);
+router.post("/shareTodo/:todoId", protectedRoute, shareTodo);
+router.get("/getSharedTodos", protectedRoute, getSharedTodos);
+router.put("/editSharedTodo", protectedRoute, editSharedTodo);
 
 export default router;

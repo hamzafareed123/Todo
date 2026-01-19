@@ -125,7 +125,7 @@ export const useTodoStore = create((set, get) => ({
     try {
       set({ isTodoLoading: true });
       const response = await axiosInstance.get(
-        `/todo/searchTodos?query=${query}&page=${page}&limit=${limit}`
+        `/todo/searchTodos?query=${query}&page=${page}&limit=${limit}`,
       );
 
       set({
@@ -143,4 +143,38 @@ export const useTodoStore = create((set, get) => ({
   clearErrors: () => {
     set({ fieldErrors: {} });
   },
+
+  shareTodo: async (sharedData, todoId) => {
+    try {
+      const response = await axiosInstance.post(
+        `/todo/shareTodo/${todoId}`,
+        sharedData,
+      );
+      console.log("response in share todo ", response);
+      const { sharedCount, skippedCount } = response.data.data;
+      if (sharedCount == 0) {
+        toast.success("Todo already shared with selected users");
+      } else if (sharedCount > 0 && skippedCount > 0) {
+        toast.success(
+          `Shared with ${sharedCount} user(s). ${skippedCount} already had access`,
+        );
+      } else {
+        toast.success(response?.data.message || "Todo Shared Successfully");
+      }
+    } catch (error) {
+      console.log("Error in sharing response ", error);
+      toast.error(error.response?.data?.message || "Error in Sharing Todo");
+    }
+  },
+
+  getSharedTodos : async()=>{
+    try {
+      const response = await axiosInstance.get("/todo/getSharedTodos");
+      console.log(response)
+      return response.data.data
+    } catch (error) {
+      console.log(error)
+      toast.error("error in fetching todos")
+    }
+  }
 }));
