@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
 
+
+
 export const useTodoStore = create((set, get) => ({
   allTodos: [],
   isTodoLoading: true,
@@ -11,6 +13,7 @@ export const useTodoStore = create((set, get) => ({
   inputValue: "",
   totalSearchCount: 0,
   fieldErrors: {},
+  editedTodos:[],
 
   setTab: (tab) => {
     set({ selectedTab: tab });
@@ -175,6 +178,26 @@ export const useTodoStore = create((set, get) => ({
     } catch (error) {
       console.log(error)
       toast.error("error in fetching todos")
+    }
+  },
+
+  updateSharedTodo:async(data,todoId)=>{
+    try {
+      const response = await axiosInstance.put(`/todo/editSharedTodo/${todoId}`,data)
+      console.log("Response is ", response.data.data);
+      toast.success(response?.data.message);
+    } catch (error) {
+      toast.error(error.response?.data?.message)
+    }
+  },
+
+  getEditedTods:async ()=>{
+    try {
+      const response = await axiosInstance.get("/todo/getEditHistory");
+      set({editedTodos:response?.data.data});
+    } catch (error) {
+      console.log("error in fetching edited todos", error);
+      
     }
   }
 }));

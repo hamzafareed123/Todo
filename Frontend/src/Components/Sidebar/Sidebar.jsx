@@ -6,6 +6,7 @@ import {
   Settings,
   LogOut,
   HandshakeIcon,
+  UserRoundPenIcon,
 } from "lucide-react";
 import avatarImage from "/avatar.png";
 import { Link } from "react-router-dom";
@@ -102,7 +103,7 @@ const Sidebar = () => {
           </Link>
 
           <Link
-             onClick={() => {
+            onClick={() => {
               setIsOpen(false);
               setTab("Collaborations");
             }}
@@ -112,7 +113,23 @@ const Sidebar = () => {
             title={isCollapsed ? "Collaborations" : ""}
           >
             <HandshakeIcon className="w-5 h-5" />
-            Collaborations
+            {!isCollapsed && (
+              <span className="font-medium">Collaborations</span>
+            )}
+          </Link>
+
+          <Link
+            onClick={() => {
+              setIsOpen(false);
+              setTab("EditedTodos");
+            }}
+            className={`flex items-center gap-3 rounded-lg  hover:bg-opacity-20 transition duration-200  active:bg-opacity-30 ${
+              isCollapsed ? "w-10 h-10 justify-center" : "px-4 py-3 w-full"
+            }`}
+            title={isCollapsed ? "EditedTodos" : ""}
+          >
+            <UserRoundPenIcon className="w-5 h-5" />
+            {!isCollapsed && <span className="font-medium">Edited Todos</span>}
           </Link>
         </nav>
       </div>

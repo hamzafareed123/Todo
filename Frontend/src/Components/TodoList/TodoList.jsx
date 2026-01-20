@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
 import { useTodoStore } from "../../Store/todo-store";
-import { Trash2Icon, Edit2Icon, MoreVertical, Share2Icon } from "lucide-react";
+import { Trash2Icon, Edit2Icon, MoreVertical, Share2Icon,User } from "lucide-react";
 import EmptyTodoList from "../EmptyTodoList/EmptyTodoList";
 import AddTasks from "../AddTasks/AddTasks";
 import { X } from "lucide-react";
 import Select from "react-select";
 import Pagination from "../Pagination/Pagination.jsx";
 import ShareModal from "../ShareModal/ShareModal.jsx";
+
 
 const TodoList = () => {
   const {
@@ -45,6 +46,8 @@ const TodoList = () => {
     getPageTodos(1, 5, activeTodo);
   }, [activeTodo]);
 
+  console.log("all todos ", allTodos);
+
   const shouldDisableButton =
     isSubmitted && Object.keys(fieldErrors || {}).length > 0;
 
@@ -70,7 +73,7 @@ const TodoList = () => {
       editingId,
       formData,
       currentPage,
-      activeTodo
+      activeTodo,
     );
 
     if (result?.success) {
@@ -107,6 +110,13 @@ const TodoList = () => {
     { value: "canceled", label: "Canceled" },
   ];
 
+  const getEdit = (todo) => {
+    if (todo.editHistory && todo.editHistory.length > 0) {
+      return todo.editHistory[0].editedBy;
+    }
+    return null;
+  };
+
   return (
     <>
       <AddTasks currentPage={currentPage} activeTodo={activeTodo} />
@@ -140,72 +150,84 @@ const TodoList = () => {
               <p className="text-center text-gray-500 mt-10">{error}</p>
             ) : allTodos && allTodos.length > 0 ? (
               <>
-                {allTodos.map((todo) => (
-                  <div
-                    key={todo._id}
-                    className="flex flex-row items-center justify-between bg-white rounded-lg p-4 shadow-md transition"
-                  >
-                    <div className="flex flex-col items-start justify-start gap-1 flex-1">
-                      <h5 className="text-lg font-semibold text-black">
-                        {todo.todoName}
-                      </h5>
-                      <p className="text-sm text-gray-600">
-                        {todo.description}
-                      </p>
-                    </div>
-
-                    {/* Three-dot menu */}
-                    <div className="relative ml-4">
-                      <button
-                        onClick={() =>
-                          setOpenMenuId(
-                            openMenuId === todo._id ? null : todo._id
-                          )
-                        }
-                        className="p-2 rounded-lg transition cursor-pointer text-black hover:text-gray-500 hover:bg-gray-100"
-                      >
-                        <MoreVertical className="w-5 h-5" />
-                      </button>
-
-                      {openMenuId === todo._id && (
-                        <>
-                          <div
-                            className="fixed inset-0 z-40"
-                            onClick={() => setOpenMenuId(null)}
-                          />
-                          <div
-                            onClick={() => setOpenMenuId(null)}
-                            className="absolute right-0 mt-2 w-48  bg-white border border-gray-300 rounded-lg shadow-lg z-50"
-                          >
-                            <button
-                              onClick={() => handleEdit(todo)}
-                              className="w-full flex items-center cursor-pointer gap-2 px-4 py-2 hover:bg-gray-100 transition text-left"
-                            >
-                              <Edit2Icon className="w-4 h-4" />
-                              <span>Edit</span>
-                            </button>
-
-                            <button
-                              onClick={() => handleShare(todo)}
-                              className="w-full flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 transition text-left border-t border-gray-200"
-                            >
-                              <Share2Icon className="w-4 h-4" />
-                              <span>Share</span>
-                            </button>
-
-                            <button
-                              onClick={() => handleDelete(todo._id)}
-                              className="w-full flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-red-100 transition text-left text-red-600 border-t border-gray-200"
-                            >
-                              <Trash2Icon className="w-4 h-4" />
-                              <span>Delete</span>
-                            </button>
+                {allTodos.map((todo) => {
+                  const editTodo = getEdit(todo);
+                  return (
+                    <div
+                      key={todo._id}
+                      className="flex flex-row items-center justify-between bg-white rounded-lg p-4 shadow-md transition"
+                    >
+                      <div className="flex flex-col items-start justify-start gap-1 flex-1">
+                       <div className="flex flex-row items-center justify-between w-full">
+                         <h5 className="text-lg font-semibold text-black">
+                          {todo.todoName}
+                        </h5>
+                        {editTodo && (
+                          <div className="flex items-center gap-2 text-sm text-amber-600">
+                            <User className="w-3 h-3" />
+                            <span>Edited by: {editTodo}</span>
                           </div>
-                        </>
-                      )}
+                        )}
+                       </div>
+                        <p className="text-sm text-gray-600 mt-2">
+                          {todo.description}
+                        </p>
+                      </div>
+                     
+
+                      {/* three dots menu */}
+                      <div className="relative ml-4">
+                        <button
+                          onClick={() =>
+                            setOpenMenuId(
+                              openMenuId === todo._id ? null : todo._id,
+                            )
+                          }
+                          className="p-2 rounded-lg transition cursor-pointer text-black hover:text-gray-500 hover:bg-gray-100"
+                        >
+                          <MoreVertical className="w-5 h-5" />
+                        </button>
+
+                        {openMenuId === todo._id && (
+                          <>
+                            <div
+                              className="fixed inset-0 z-40"
+                              onClick={() => setOpenMenuId(null)}
+                            />
+                            <div
+                              onClick={() => setOpenMenuId(null)}
+                              className="absolute right-0 mt-2 w-48  bg-white border border-gray-300 rounded-lg shadow-lg z-50"
+                            >
+                              <button
+                                onClick={() => handleEdit(todo)}
+                                className="w-full flex items-center cursor-pointer gap-2 px-4 py-2 hover:bg-gray-100 transition text-left"
+                              >
+                                <Edit2Icon className="w-4 h-4" />
+                                <span>Edit</span>
+                              </button>
+
+                              <button
+                                onClick={() => handleShare(todo)}
+                                className="w-full flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-gray-100 transition text-left border-t border-gray-200"
+                              >
+                                <Share2Icon className="w-4 h-4" />
+                                <span>Share</span>
+                              </button>
+
+                              <button
+                                onClick={() => handleDelete(todo._id)}
+                                className="w-full flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-red-100 transition text-left text-red-600 border-t border-gray-200"
+                              >
+                                <Trash2Icon className="w-4 h-4" />
+                                <span>Delete</span>
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
                 <Pagination activeTodo={activeTodo} />
               </>
             ) : (
