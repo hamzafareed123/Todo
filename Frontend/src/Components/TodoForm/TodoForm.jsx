@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { X } from "lucide-react";
+import { useTodoStore } from "../../Store/todo-store";
 
 const TodoForm = ({ sharedTodo, onClose }) => {
   const [formData, setFormData] = useState({
@@ -7,6 +8,7 @@ const TodoForm = ({ sharedTodo, onClose }) => {
     description: sharedTodo?.description || "",
     status: sharedTodo?.status || "pending",
   });
+  const {updateSharedTodo} = useTodoStore()
 
   const [loading, setLoading] = useState(false);
 
@@ -38,14 +40,13 @@ const TodoForm = ({ sharedTodo, onClose }) => {
     setLoading(true);
     
     try {
-      // Add your API call here
+      setLoading(true)
       console.log("Updating todo:", formData);
-      // await updateTodo(sharedTodo._id, formData);
-      // toast.success("Todo updated successfully");
+     updateSharedTodo(formData,sharedTodo._id)
       onClose();
     } catch (error) {
       console.log("Error updating todo:", error);
-      // toast.error("Error updating todo");
+    
     } finally {
       setLoading(false);
     }

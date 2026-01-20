@@ -11,6 +11,7 @@ import {
   shareTodo,
   getSharedTodos,
   editSharedTodo,
+  getEditHistory
 } from "../controllers/todo.controller.js";
 import { validate } from "../middleware/validationMiddleware.js";
 import {
@@ -34,6 +35,7 @@ router.get("/allTodos", protectedRoute, allTods);
 router.get("/searchTodos", protectedRoute, searchTodos);
 router.post("/shareTodo/:todoId", protectedRoute, shareTodo);
 router.get("/getSharedTodos", protectedRoute, getSharedTodos);
-router.put("/editSharedTodo", protectedRoute, editSharedTodo);
+router.put("/editSharedTodo/:todoId", protectedRoute, editSharedTodo);
+router.get("/getEditHistory",protectedRoute,getEditHistory)
 
 export default router;

@@ -32,6 +32,7 @@ export const getAllTodo = async (req, res, next) => {
     const userId = req.user.id;
 
     const allTodo = await Todo.find({ userId });
+    console.log("all todos are ", allTodo)
 
     return res.status(200).json(allTodo);
   } catch (error) {
@@ -168,8 +169,6 @@ export const shareTodo = async (req, res, next) => {
     const senderId = req.user._id;
     const { todoId } = req.params;
 
-
-
     if (!emails) {
       throw new customError("Email is required", 400);
     }
@@ -235,27 +234,135 @@ export const getSharedTodos = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    let sharedTodos = await Todo.find({ "sharedWith.userId": userId })
-      .populate("userId", "fullName email profilePic");
+    let sharedTodos = await Todo.find({ "sharedWith.userId": userId }).populate(
+      "userId",
+      "fullName email profilePic",
+    );
 
     const filterSharedTodos = sharedTodos.map((todo) => {
       const todoObj = todo.toObject();
-      
+
       return {
         ...todoObj,
-        userId:{
+        userId: {
           ...todoObj.userId,
-          profilePic:generateFileUrl(todoObj.userId.profilePic,req)
+          profilePic: generateFileUrl(todoObj.userId.profilePic, req),
         },
         sharedWith: todoObj.sharedWith.filter(
-          (share) => share.userId.toString() === userId.toString()
-        )
+          (share) => share.userId.toString() === userId.toString(),
+        ),
       };
     });
 
     res.status(200).json({
       success: true,
       data: filterSharedTodos,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editSharedTodo = async (req, res, next) => {
+  try {
+    const senderId = req.user._id;
+    const { todoId } = req.params;
+
+    const { description, status } = req.body;
+
+    const todo = await Todo.findById(todoId);
+
+    if (!todo) {
+      throw new customError("No Todo Found", 404);
+    }
+
+    const userShare = todo.sharedWith.find(
+      (share) => share.userId.toString() === senderId.toString(),
+    );
+
+    // check user have editing permission
+
+    if (!userShare || userShare.permission !== "edit") {
+      throw new customError("You don't have permission to edit this todo", 403);
+    }
+
+    const changes = {};
+
+    if (description && description !== todo.description) {
+      changes.description = description;
+    }
+    if (status && status !== todo.status) {
+      changes.status = status;
+    }
+
+    if (Object.keys(changes).length > 0) {
+      todo.editHistory.push({
+        editedBy: req.user.email,
+        editedAt: new Date(),
+        changes: changes,
+      });
+    }
+
+    if (description) todo.description = description;
+    if (status) todo.status = status;
+
+    await todo.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Todo updated successfully",
+      data: todo,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getEditHistory = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+   
+
+    const todos = await Todo.find({
+      userId,
+      editHistory: { $exists: true, $ne: [] },
+    })
+      .populate("userId", "fullName email profilePic")
+      .populate("sharedWith.userId", "fullName email profilePic")
+      .sort({ updatedAt: -1 });
+
+    const editHistoryData = [];
+
+    todos.forEach((todo) => {
+      todo.editHistory.forEach((edit) => {
+        const editor = todo.sharedWith.find(
+          (share) =>
+            share.userId.email === edit.editedBy ||
+            share.email === edit.editedBy,
+        );
+
+        console.log("editor is ",editor)
+
+        editHistoryData.push({
+          todoId: todo._id,
+          todoName: todo.todoName,
+          editedBy: edit.editedBy,
+          editorName: editor? editor.userId.fullName : "UnKnow User",
+          profilePic:generateFileUrl(editor.userId.profilePic,req),
+          editedAt: edit.editedAt,
+          changes: edit.changes,
+        });
+      });
+    });
+
+    editHistoryData.sort((a, b) => new Date(b.editedAt) - new Date(a.editedAt));
+    console.log("todos are ", editHistoryData);
+
+    res.status(200).json({
+      success: true,
+      data: editHistoryData,
+      totalEdits: editHistoryData.length,
     });
   } catch (error) {
     next(error);
