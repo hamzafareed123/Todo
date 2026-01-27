@@ -46,7 +46,7 @@ const TodoList = () => {
     getPageTodos(1, 5, activeTodo);
   }, [activeTodo]);
 
-  console.log("all todos ", allTodos);
+ 
 
   const shouldDisableButton =
     isSubmitted && Object.keys(fieldErrors || {}).length > 0;
@@ -98,7 +98,7 @@ const TodoList = () => {
   };
 
   const handleShare = (todo) => {
-    console.log("Share todo:", todo);
+   
     setShareModalOpen(true);
     setSelectedTodoForShare(todo);
     setOpenMenuId(null);

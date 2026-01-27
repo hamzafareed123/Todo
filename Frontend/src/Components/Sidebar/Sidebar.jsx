@@ -16,7 +16,17 @@ import { useTodoStore } from "../../Store/todo-store";
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { authUser, Logout } = useAuthStore();
+  const {
+    authUser,
+    Logout,
+    unreadNotifications,
+    clearNotification,
+    updateSharedTodoNotification,
+    clearUpdateNotifications
+  } = useAuthStore();
+
+  console.log("Unread Notification are ", unreadNotifications);
+    console.log("Unread Notification are ", updateSharedTodoNotification);
 
   const { setTab } = useTodoStore();
 
@@ -30,9 +40,9 @@ const Sidebar = () => {
       </button>
 
       <div
-        className={`sidebar-modal fixed md:relative w-64 h-screen shadow-2xl  p-6 transition-all duration-300  ${
+        className={`sidebar-modal fixed top-0 h-screen w-64 shadow-2xl p-6 transition-all duration-300 text-black ${
           isOpen ? "left-0" : "-left-64"
-        } md:left-0 z-40 ${isCollapsed ? "md:w-24" : "md:w-64"}`}
+        } md:left-0 z-40 ${isCollapsed ? "md:w-24" : "md:w-64"} overflow-y-auto`}
       >
         <div className="flex items-center gap-2 mb-4">
           <button
@@ -106,6 +116,7 @@ const Sidebar = () => {
             onClick={() => {
               setIsOpen(false);
               setTab("Collaborations");
+              clearNotification();
             }}
             className={`flex items-center gap-3 rounded-lg  hover:bg-opacity-20 transition duration-200  active:bg-opacity-30 ${
               isCollapsed ? "w-10 h-10 justify-center" : "px-4 py-3 w-full"
@@ -116,12 +127,19 @@ const Sidebar = () => {
             {!isCollapsed && (
               <span className="font-medium">Collaborations</span>
             )}
+            {unreadNotifications !== 0 && (
+              <span className="right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                {unreadNotifications > 99 ? "99+" : unreadNotifications}
+              </span>
+            )}
           </Link>
 
           <Link
             onClick={() => {
               setIsOpen(false);
               setTab("EditedTodos");
+              clearUpdateNotifications()
+
             }}
             className={`flex items-center gap-3 rounded-lg  hover:bg-opacity-20 transition duration-200  active:bg-opacity-30 ${
               isCollapsed ? "w-10 h-10 justify-center" : "px-4 py-3 w-full"
@@ -130,6 +148,9 @@ const Sidebar = () => {
           >
             <UserRoundPenIcon className="w-5 h-5" />
             {!isCollapsed && <span className="font-medium">Edited Todos</span>}
+            {updateSharedTodoNotification !== 0 && (
+              <span className="right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center">{updateSharedTodoNotification}</span>
+            )}
           </Link>
         </nav>
       </div>

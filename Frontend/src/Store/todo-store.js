@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
-
-
+import { useAuthStore } from "./auth-store";
 
 export const useTodoStore = create((set, get) => ({
   allTodos: [],
@@ -13,7 +12,7 @@ export const useTodoStore = create((set, get) => ({
   inputValue: "",
   totalSearchCount: 0,
   fieldErrors: {},
-  editedTodos:[],
+  editedTodos: [],
 
   setTab: (tab) => {
     set({ selectedTab: tab });
@@ -149,12 +148,25 @@ export const useTodoStore = create((set, get) => ({
 
   shareTodo: async (sharedData, todoId) => {
     try {
+      const authUser = useAuthStore.getState().authUser;
+      const socket = useAuthStore.getState().socket;
+
       const response = await axiosInstance.post(
         `/todo/shareTodo/${todoId}`,
         sharedData,
       );
-      console.log("response in share todo ", response);
+
       const { sharedCount, skippedCount } = response.data.data;
+
+      if (sharedCount > 0 && socket) {
+        socket.emit("todoShared", {
+          sharedWith: sharedData.emails,
+          permission: sharedData.permission,
+          sharedBy: authUser.fullName,
+          sharedById: authUser._id,
+        });
+      }
+
       if (sharedCount == 0) {
         toast.success("Todo already shared with selected users");
       } else if (sharedCount > 0 && skippedCount > 0) {
@@ -170,34 +182,56 @@ export const useTodoStore = create((set, get) => ({
     }
   },
 
-  getSharedTodos : async()=>{
+  getSharedTodos: async () => {
     try {
       const response = await axiosInstance.get("/todo/getSharedTodos");
-      console.log(response)
-      return response.data.data
+      console.log(response);
+      return response.data.data;
     } catch (error) {
-      console.log(error)
-      toast.error("error in fetching todos")
+      console.log(error);
+      toast.error("error in fetching todos");
     }
   },
 
-  updateSharedTodo:async(data,todoId)=>{
+  updateSharedTodo: async (data, todoId) => {
     try {
-      const response = await axiosInstance.put(`/todo/editSharedTodo/${todoId}`,data)
+      const authUser = useAuthStore.getState().authUser;
+      const socket = useAuthStore.getState().socket;
+
+      const response = await axiosInstance.put(
+        `/todo/editSharedTodo/${todoId}`,
+        data,
+      );
+
+      console.log("response in updated shared todo", response.data)
+      const {userId}= response.data.data;
+      console.log("user id is ", userId)
+
+      if (socket) {
+        socket.emit("updateSharedTodo", {
+          todoId,
+          updatedData: data,
+          updatedBy: authUser.fullName,
+          updatedById: authUser._id,
+          createdBy: String(userId),
+        });
+      }
+
+      console.log("data is ", data);
+
       console.log("Response is ", response.data.data);
       toast.success(response?.data.message);
     } catch (error) {
-      toast.error(error.response?.data?.message)
+      toast.error(error.response?.data?.message);
     }
   },
 
-  getEditedTods:async ()=>{
+  getEditedTods: async () => {
     try {
       const response = await axiosInstance.get("/todo/getEditHistory");
-      set({editedTodos:response?.data.data});
+      set({ editedTodos: response?.data.data });
     } catch (error) {
       console.log("error in fetching edited todos", error);
-      
     }
-  }
+  },
 }));
