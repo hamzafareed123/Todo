@@ -3,8 +3,10 @@ import { useTodoStore } from "../Store/todo-store";
 import { Clock, User, FileEdit } from "lucide-react";
 import { useEffect } from "react";
 import avatar from "/avatar.png"
+import { useAuthStore } from "../Store/auth-store";
 const EditedTodos = () => {
   const { getEditedTods, editedTodos } = useTodoStore();
+  const {socket} = useAuthStore();
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -17,8 +19,19 @@ const EditedTodos = () => {
     });
   };
 
+
   useEffect(()=>{
-    getEditedTods()
+    socket.on("todoEdited",(data)=>{
+      getEditedTods();
+    });
+
+    return ()=>{
+      socket.off("todoEdited")
+    }
+  },[socket])
+
+  useEffect(()=>{
+    getEditedTods();
 },[])
 
 console.log("edited data is", editedTodos)
@@ -47,9 +60,9 @@ console.log("edited data is", editedTodos)
         </div>
 
         <div className="space-y-4">
-          {editedTodos.map((todo) => (
+          {editedTodos.map((todo,index) => (
             <div 
-              key={todo.todoId}
+                key={`${todo.todoId}-${todo.editedBy}-${index}`}
               className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow duration-200"
             >
               <div className="flex items-start justify-between mb-4">
@@ -75,7 +88,7 @@ console.log("edited data is", editedTodos)
                 
                 {todo.changes.description && (
                   <div className="flex items-start gap-2">
-                    <span className="text-sm font-medium text-slate-600 min-w-fit">Description:</span>
+                    <span className="text-sm font-medium text-slate-600 min-w-fit mt-2">Description:</span>
                     <span className="text-sm text-slate-700 bg-slate-50 px-3 py-1.5 rounded-lg flex-1">
                       {todo.changes.description}
                     </span>

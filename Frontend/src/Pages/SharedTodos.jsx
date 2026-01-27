@@ -3,19 +3,20 @@ import { useTodoStore } from "../Store/todo-store";
 import { Lock, Edit2, Loader } from "lucide-react";
 import ViewDetailsModal from "../Components/ViewDetailsModal/ViewDetailsModal";
 import TodoForm from "../Components/TodoForm/TodoForm";
+import { useAuthStore } from "../Store/auth-store";
 
 const SharedTodos = () => {
   const { getSharedTodos } = useTodoStore();
+  const {socket} = useAuthStore();
   const [sharedTodos, setSharedTodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTodoForDetail, setSelectedTodoForDetail] = useState(null);
   const [isEditModalOpen,setIsEditModalOpen] = useState(false)
   const [sendEditData,setSendEditData]= useState(null);
 
-  useEffect(() => {
-    fetchSharedTodos();
-  }, []);
 
+
+  
   const fetchSharedTodos = async () => {
     try {
       setLoading(true);
@@ -27,6 +28,27 @@ const SharedTodos = () => {
       setLoading(false);
     }
   };
+    useEffect(() => {
+    fetchSharedTodos();
+  }, []);
+
+
+
+  useEffect(() => {
+    if(!socket) return 
+
+    socket.on("newSharedTodo",async(sharedTodos)=>{
+      console.log("Shared todos are", sharedTodos);
+
+      fetchSharedTodos()
+    });
+
+  return ()=>{
+    socket.off("newSharedTodo")
+  };
+   
+  }, [socket]);
+
 
   if (loading) {
     return (

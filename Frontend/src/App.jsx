@@ -9,13 +9,56 @@ import { Loader2 } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 import ForgotPasswordPage from "./Pages/ForgotPasswordPage";
 import ResetPasswrodPage from "./Pages/ResetPasswrodPage";
+import toast from "react-hot-toast";
 
 function App() {
-  const { authUser, isCheckingAuth, checkAuth } = useAuthStore();
+  const {
+    authUser,
+    isCheckingAuth,
+    checkAuth,
+    connectSocket,
+    disConnectSocket,
+    socket,
+    addNotification,
+    addUpdatedNotifications
+  } = useAuthStore();
 
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []);
+
+  useEffect(() => {
+    if (authUser) {
+      connectSocket();
+    } else if (!authUser) {
+      disConnectSocket();
+    }
+  }, [authUser]);
+
+  
+ useEffect(() => {
+  if (socket) {
+    const handleTodoShared = (data) => {
+      addNotification();
+      console.log("Notification received:", data);
+      toast.success(`${data.sharedBy} shared Task with you`);
+    };
+
+    const handleTodoUpdated = (data) => {
+      addUpdatedNotifications();
+      console.log(data);
+      toast.success(`${data.updatedBy} update todo`);
+    };
+
+    socket.on("todoSharedNotification", handleTodoShared);
+    socket.on("updatedTodoNotification", handleTodoUpdated);
+
+    return () => {
+      socket.off("todoSharedNotification", handleTodoShared);
+      socket.off("updatedTodoNotification", handleTodoUpdated);
+    };
+  }
+}, [socket, addNotification]);
 
   if (isCheckingAuth) {
     return (
@@ -27,8 +70,6 @@ function App() {
       </div>
     );
   }
-
-
 
   return (
     <>

@@ -2,6 +2,8 @@ import Todo from "../models/Todo.js";
 import { customError } from "../lib/customError.js";
 import User from "../models/User.js";
 import { generateFileUrl } from "../lib/urlGenerator.js";
+import { getReceiverSocketId } from "../socket/socketHandler.js";
+import {io} from "../server.js"
 
 export const addTodo = async (req, res, next) => {
   try {
@@ -32,7 +34,6 @@ export const getAllTodo = async (req, res, next) => {
     const userId = req.user.id;
 
     const allTodo = await Todo.find({ userId });
-    console.log("all todos are ", allTodo)
 
     return res.status(200).json(allTodo);
   } catch (error) {
@@ -129,6 +130,8 @@ export const allTods = async (req, res, next) => {
   }
 };
 
+
+
 export const searchTodos = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -207,6 +210,19 @@ export const shareTodo = async (req, res, next) => {
       });
 
       addedCount++;
+
+       const receiverSocketId = getReceiverSocketId(reciver._id.toString())
+
+       if (receiverSocketId) {
+        io.to(receiverSocketId).emit("newSharedTodo", {
+          todoId: todo._id,
+          todoName: todo.todoName,
+          description: todo.description,
+          status: todo.status,
+          sharedBy: req.user.fullName,
+          permission: permission,
+        });
+      }
     }
 
     if (addedCount > 0) {
@@ -214,6 +230,8 @@ export const shareTodo = async (req, res, next) => {
 
       await todo.save();
     }
+
+    
 
     res.status(200).json({
       success: true,
@@ -237,7 +255,7 @@ export const getSharedTodos = async (req, res, next) => {
     let sharedTodos = await Todo.find({ "sharedWith.userId": userId }).populate(
       "userId",
       "fullName email profilePic",
-    );
+    ).sort({ "sharedWith.sharedAt": -1 });
 
     const filterSharedTodos = sharedTodos.map((todo) => {
       const todoObj = todo.toObject();
@@ -308,6 +326,21 @@ export const editSharedTodo = async (req, res, next) => {
 
     await todo.save();
 
+     const creatorSocketId = getReceiverSocketId(todo.userId.toString());
+    
+    if (creatorSocketId) {
+      io.to(creatorSocketId).emit("todoEdited", {
+        todoId: todo._id,
+        todoName: todo.todoName,
+        editedBy: req.user.fullName,
+        editedEmail: req.user.email,
+        changes: changes,
+        editedAt: new Date(),
+        updatedDescription: description,
+        updatedStatus: status,
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Todo updated successfully",
@@ -321,8 +354,6 @@ export const editSharedTodo = async (req, res, next) => {
 export const getEditHistory = async (req, res, next) => {
   try {
     const userId = req.user._id;
-
-   
 
     const todos = await Todo.find({
       userId,
@@ -342,14 +373,12 @@ export const getEditHistory = async (req, res, next) => {
             share.email === edit.editedBy,
         );
 
-        console.log("editor is ",editor)
-
         editHistoryData.push({
           todoId: todo._id,
           todoName: todo.todoName,
           editedBy: edit.editedBy,
-          editorName: editor? editor.userId.fullName : "UnKnow User",
-          profilePic:generateFileUrl(editor.userId.profilePic,req),
+          editorName: editor ? editor.userId.fullName : "UnKnow User",
+          profilePic: generateFileUrl(editor.userId.profilePic, req),
           editedAt: edit.editedAt,
           changes: edit.changes,
         });
@@ -357,7 +386,6 @@ export const getEditHistory = async (req, res, next) => {
     });
 
     editHistoryData.sort((a, b) => new Date(b.editedAt) - new Date(a.editedAt));
-    console.log("todos are ", editHistoryData);
 
     res.status(200).json({
       success: true,

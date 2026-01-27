@@ -5,7 +5,7 @@ import avatar from "/avatar.png";
 import { useTodoStore } from "../../Store/todo-store";
 
 const ShareModal = ({ todo, onClose }) => {
-  const { getAllUsers, allUsers } = useAuthStore();
+  const { getAllUsers, allUsers,onLineUsers } = useAuthStore();
   const { shareTodo } = useTodoStore();
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [permission, setPermission] = useState("view");
@@ -16,6 +16,8 @@ const ShareModal = ({ todo, onClose }) => {
   useEffect(() => {
     getAllUsers();
   }, []);
+
+  console.log("online users are ", onLineUsers)
 
   const filteredUsers = allUsers?.filter((user) =>
     user.fullName.toLowerCase().includes(searchQuery.toLowerCase()),
@@ -36,6 +38,8 @@ const handleShare = async () => {
     emails: selectedUsers.map(user => user.email),
     permission: permission 
   };
+
+  console.log("Shared data", sharedData)
   
   try {
     await shareTodo(sharedData, todo._id);
@@ -154,7 +158,7 @@ const handleShare = async () => {
                     {isSelected && <Check className="w-4 h-4 text-black" />}
                   </div>
 
-                  <div className="relative">
+                  <div className={`relative ${onLineUsers.includes(user._id)? 'avatar-online ':' avatar-offline'}`}>
                     <img
                       className="h-12 w-12 rounded-full object-cover ring-2 ring-gray-100"
                       src={user.profilePic || avatar}
